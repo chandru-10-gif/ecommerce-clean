@@ -9,61 +9,58 @@ export default function Dashboard({
   loading
 }) {
 
-const filteredProducts=
-products.filter((product)=>
-product?.title
-?.toLowerCase()
-.includes(search.toLowerCase())
-);
+  const filteredProducts =
+    products.filter((product) =>
+      product?.title
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
+    );
 
-return(
+  return (
+    <div className="bg-white p-3">
 
-<div className="bg-white p-3">
+      {loading ? (
 
-<div className="d-flex flex-wrap justify-content-center gap-3">
+        <div className="d-flex flex-wrap justify-content-center gap-3">
 
-{loading ? (
+          {[1,2,3,4,5,6].map((item) => (
 
-[1,2,3,4,5,6].map((item)=>(
+            <div
+              key={item}
+              className="skeleton-card"
+            >
+              <div className="skeleton-image"></div>
+              <div className="skeleton-text"></div>
+              <div className="skeleton-text short"></div>
+            </div>
 
-<div
-key={item}
-className="skeleton-card"
+          ))}
+
+        </div>
+
+      ) : (
+
+        <div className="row g-3 justify-content-center">
+
+          {filteredProducts.map((product) => (
+
+            <div
+  key={product.id}
+  className="col-6 col-md-4 col-lg-3"
 >
+              <ProductCart
+                {...product}
+                singleProductLoading={singleProductLoading}
+                setSingleProductLoading={setSingleProductLoading}
+              />
+            </div>
 
-<div className="skeleton-image"></div>
+          ))}
 
-<div className="skeleton-text"></div>
+        </div>
 
-<div className="skeleton-text short"></div>
+      )}
 
-</div>
-
-))
-
-) : (
-
-filteredProducts.map((product)=>(
-
-<ProductCart
-key={product.id}
-{...product}
-singleProductLoading={
-singleProductLoading
-}
-setSingleProductLoading={
-setSingleProductLoading
-}
-/>
-
-))
-
-)}
-
-</div>
-
-</div>
-
-);
-
+    </div>
+  );
 }

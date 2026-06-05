@@ -4,23 +4,24 @@ export default function ProductListItem(props) {
   return (
     <div
       className="d-flex align-items-center justify-content-between border rounded p-3 mb-4 shadow-sm"
-      style={{
-        width: "800px",
-        backgroundColor: "white",
-      }}
+
+style={{
+  width: "100%",
+  backgroundColor: "white"
+}}
     >
       <img
         src={props.image}
         alt={props.title}
-        className="me-4"
+        className="mb-3 mb-md-0 me-md-4"
         style={{
-          width: "200px",
-          height: "200px",
+          width: "150px",
+          height: "150px",
           objectFit: "contain",
         }}
       />
 
-      <div>
+      <div className="flex-grow-1 text-center text-md-start">
         <h5>{props.title}</h5>
 
         <h6>Price: ₹ {props.price}</h6>
@@ -31,9 +32,9 @@ export default function ProductListItem(props) {
 
         <h6>Reviews: {props.rating?.count}</h6>
 
-        <div className="mt-3">
+        <div className="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
           <button
-            className="btn btn-danger me-3"
+            className="btn btn-danger "
             onClick={props.incrementItem}
           >
             +
@@ -42,14 +43,14 @@ export default function ProductListItem(props) {
           <span>Quantity: {props.count}</span>
 
           <button
-            className="btn btn-danger ms-3"
+            className="btn btn-danger "
             onClick={props.decrementItem}
           >
             -
           </button>
 
           <button
-            className="btn btn-danger ms-3"
+            className="btn btn-danger "
             onClick={props.removeItem}
           >
             Remove

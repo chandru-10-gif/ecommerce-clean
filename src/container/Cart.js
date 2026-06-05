@@ -53,7 +53,7 @@ export default function Cart() {
         <BackButton />
       </div>
 
-      <div className="mt-4 d-flex flex-column align-items-center">
+      <div className="mt-4 ">
 
 
         {list.length > 0 ? (
@@ -84,11 +84,11 @@ export default function Cart() {
             ))}
 
             <button
-              className="btn btn-success mt-3"
-              onClick={() => navigate("/checkout")}
-            >
-              Go To Checkout
-            </button>
+  className="btn btn-success mt-3 w-100 w-md-auto"
+  onClick={() => navigate("/checkout")}
+>
+  Go To Checkout
+</button>
 
           </>
         ) : (

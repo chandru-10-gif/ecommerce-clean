@@ -1,15 +1,23 @@
 import { useNavigate } from "react-router-dom";
 
 export default function BackButton() {
-
   const navigate = useNavigate();
 
   return (
-    <button
-      className="btn btn-dark position-fixed top-70px start-0 m-3"
-      onClick={() => navigate(-1)}
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "flex-start",
+        marginBottom: "15px",
+      }}
     >
-      ← Back
-    </button>
+      <button
+        className="btn btn-dark"
+        onClick={() => navigate(-1)}
+      >
+        ← 
+      </button>
+    </div>
   );
 }

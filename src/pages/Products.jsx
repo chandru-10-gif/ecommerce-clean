@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getSingleProduct } from "../services/ProductService";
+import BackButton from "../container/BackButton";
 
 export default function Product() {
   const { id } = useParams();
@@ -17,26 +18,55 @@ export default function Product() {
   };
 
   if (!product) {
-    return <h2>Loading...</h2>;
+    return (
+      <div className="text-center mt-5">
+        <h2>Loading...</h2>
+      </div>
+    );
   }
 
   return (
-    <div className="container mt-5 text-center">
+    <div className="container mt-4">
 
-      <img
-        src={product.image}
-        width="250"
-        height="250"
-        style={{objectFit:"contain"}}
-        alt={product.title}
-      />
+      <BackButton />
 
-      <h2>{product.title}</h2>
+      <div className="row align-items-center">
 
-      <h4>₹ {product.price}</h4>
+        <div className="col-12 col-md-6 text-center">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="img-fluid"
+            style={{
+              maxHeight: "350px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
 
-      <p>{product.category}</p>
+        <div className="col-12 col-md-6 mt-4 mt-md-0">
 
+          <h2>{product.title}</h2>
+
+          <h3 className="text-success">
+            ₹ {product.price}
+          </h3>
+
+          <p>
+            <strong>Category:</strong> {product.category}
+          </p>
+
+          <button className="btn btn-success me-2">
+            Add To Cart
+          </button>
+
+          <button className="btn btn-outline-danger">
+            Wishlist
+          </button>
+
+        </div>
+
+      </div>
     </div>
   );
 }

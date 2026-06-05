@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../container/BackButton";
 
 export default function Profile() {
 
@@ -9,21 +10,13 @@ useNavigate();
 return (
 
 <div className="container mt-4">
+    <BackButton/>
 
 <div
 className="card p-4 position-relative"
 >
 
-<button
-className="btn btn-secondary position-absolute"
-style={{
-top:"10px",
-left:"10px"
-}}
-onClick={() => navigate(-1)}
->
-← Back
-</button>
+
 
 <div className="text-center">
 

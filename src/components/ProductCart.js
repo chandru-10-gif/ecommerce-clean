@@ -2,147 +2,65 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addWishlist } from "../redux/reducer/Wishlist";
+import { Icon } from "@iconify/react";
+
 
 export default function ProductCart(props) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-const dispatch =
-useDispatch();
+  const [wishlist, setWishlist] = useState(false);
 
-const navigate =
-useNavigate();
+  const singleProductGet = () => {
+    navigate(`/product/${props.id}`);
+  };
 
-const [wishlist,setWishlist] =
-useState(false);
+  return (
+    <div
+      className="product-card card text-center d-flex flex-column align-items-center position-relative"
+      onClick={singleProductGet}
+    >
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
 
-const singProductGet=()=>{
+          setWishlist(!wishlist);
 
-navigate(
-`/product/${props.id}`
-);
+          dispatch(
+            addWishlist({
+              id: props.id,
+              title: props.title,
+              price: props.price,
+              image: props.image,
+              category: props.category,
+            })
+          );
+        }}
+        className="wishlist-btn"
+      >
+        <Icon
+          icon={wishlist ? "mdi:heart" : "mdi:heart-outline"}
+          width="22"
+          height="22"
+          color={wishlist ? "red" : "#333"}
+        />
+      </button>
 
-};
+      <img
+        src={props.image}
+        alt={props.title}
+        className="product-image"
+      />
 
-return(
+      <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+        <h6 className="product-title">
+          {props.title}
+        </h6>
 
-<div
-className="card m-2 p-3 text-center d-flex flex-column align-items-center position-relative"
-style={{
-width:"250px",
-height:"420px",
-cursor:"pointer",
-transition:"all 0.3s ease"
-}}
+        <h5>₹ {props.price}</h5>
 
-onClick={singProductGet}
-
-onMouseEnter={(e)=>{
-
-e.currentTarget.style.transform=
-"scale(1.05)";
-
-e.currentTarget.style.boxShadow=
-"0 10px 20px rgba(0,0,0,0.2)";
-
-}}
-
-onMouseLeave={(e)=>{
-
-e.currentTarget.style.transform=
-"scale(1)";
-
-e.currentTarget.style.boxShadow=
-"none";
-
-}}
->
-
-{/* Wishlist Button */}
-
-<button
-onClick={(e)=>{
-
-e.stopPropagation();
-
-setWishlist(!wishlist);
-
-dispatch(
-addWishlist({
-id:props.id,
-title:props.title,
-price:props.price,
-image:props.image,
-category:props.category
-})
-);
-
-}}
-
-style={{
-position:"absolute",
-top:"10px",
-right:"10px",
-border:"none",
-background:"transparent",
-fontSize:"28px",
-cursor:"pointer"
-}}
->
-
-{
-wishlist
-?
-"❤️"
-:
-"🤍"
-}
-
-</button>
-
-
-<img
-src={props.image}
-alt={props.title}
-style={{
-width:"100%",
-height:"180px",
-objectFit:"contain"
-}}
-/>
-
-
-<div
-className="d-flex flex-column justify-content-center align-items-center flex-grow-1"
->
-
-<h6 className="mt-3">
-{props.title}
-</h6>
-
-<h5>
-₹ {props.price}
-</h5>
-
-<p>
-{props.category}
-</p>
-
-<button
-className="btn btn-success mt-3"
-onClick={(e)=>{
-
-e.stopPropagation();
-
-singProductGet();
-
-}}
->
-Available
-</button>
-
-</div>
-
-</div>
-
-);
-
+        <p>{props.category}</p>
+      </div>
+    </div>
+  );
 }
