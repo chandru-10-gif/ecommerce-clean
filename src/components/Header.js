@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/AuthService";
 import { Icon } from "@iconify/react";
-import { useSelector } from "react-redux";
+
 
 
 
@@ -11,7 +11,7 @@ export default function Header({
   setSearch = () => {},
 }) {
   const navigate = useNavigate();
-  const cartItems = useSelector((state) => state.cart);
+  
 
   const [showMenu, setShowMenu] = useState(false);
 

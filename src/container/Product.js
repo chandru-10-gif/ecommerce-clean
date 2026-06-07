@@ -20,8 +20,23 @@ export default function Product() {
   );
 
   useEffect(() => {
-    loadProduct();
-  }, [id]);
+  const loadProduct = async () => {
+    try {
+      setLoading(true);
+
+      const data = await getSingleProduct(id);
+      setItem(data);
+
+    } catch (error) {
+      console.log(error);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadProduct();
+}, [id]);
 
   const loadProduct = async () => {
     try {
