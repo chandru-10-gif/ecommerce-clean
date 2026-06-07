@@ -285,3 +285,79 @@
   min-height: 36px; /* 18px × 2 lines */
 }
   
+
+.coupon-container {
+  padding: 20px;
+  background: #f1f3f6;
+  min-height: 100vh;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.coupon-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.coupon-card {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.coupon-left h3 {
+  color: #2874f0;
+  margin-bottom: 5px;
+}
+
+.coupon-left p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.coupon-left span {
+  display: block;
+  font-size: 13px;
+  color: #777;
+}
+
+.coupon-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.code-box {
+  background: #f1f1f1;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.copy {
+  background: #ff9f00;
+  color: white;
+}
+
+.apply {
+  background: #2874f0;
+  color: white;
+}

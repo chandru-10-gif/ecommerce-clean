@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../container/BackButton";
+import { Icon } from "@iconify/react";
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -14,13 +16,9 @@ export default function EditProfile() {
 
   return (
     <div className="container mt-4">
-      {/* Back Button */}
-      <button
-        className="btn btn-outline-dark mb-3"
-        onClick={() => navigate(-1)}
-      >
-        ← Back
-      </button>
+      
+      <BackButton />
+
 
       {/* Edit Profile Card */}
       <div
@@ -28,7 +26,7 @@ export default function EditProfile() {
         style={{ maxWidth: "500px" }}
       >
         <h3 className="text-center mb-4">
-          ✏️ Edit Profile
+          <Icon icon="mdi:pencil" /> Edit Profile
         </h3>
 
         <div className="mb-3">

@@ -12,6 +12,7 @@ export default function Product() {
     loadProduct();
   }, [id]);
 
+
   const loadProduct = async () => {
     const data = await getSingleProduct(id);
     setProduct(data);
@@ -29,6 +30,7 @@ export default function Product() {
     <div className="container mt-4">
 
       <BackButton />
+      
 
       <div className="row align-items-center">
 

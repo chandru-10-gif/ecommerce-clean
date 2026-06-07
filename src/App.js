@@ -1,11 +1,11 @@
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-import { Provider } from 'react-redux';
-import store from './redux/Store';
+import { Provider } from "react-redux";
+import store from "./redux/Store";
 
-import Router from './routes';
-import { BrowserRouter } from 'react-router-dom';
+import Router from "./routes";
+import { BrowserRouter } from "react-router-dom";
 
 function App() {
   return (
