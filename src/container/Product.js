@@ -15,61 +15,38 @@ export default function Product() {
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(false);
 
-  const list = useSelector(
-    (state) => state.cart.list
-  );
+  const list = useSelector((state) => state.cart.list);
 
+  // ✅ FETCH PRODUCT (ONLY ONE useEffect)
   useEffect(() => {
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
 
-      const data = await getSingleProduct(id);
-      setItem(data);
+        const data = await getSingleProduct(id);
 
-    } catch (error) {
-      console.log(error);
+        console.log("PRODUCT DATA:", data); // ✅ DEBUG HERE
 
-    } finally {
-      setLoading(false);
-    }
-  };
+        setItem(data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  loadProduct();
-}, [id]);
-
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-
-      const data = await getSingleProduct(id);
-
-      setItem(data);
-
-    } catch (error) {
-      console.log(error);
-
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadProduct();
+  }, [id]);
 
   const element = item
-    ? list.find(
-        (el) => el.id === item.id
-      )
+    ? list.find((el) => el.id === item.id)
     : null;
 
   const addToCart = () => {
     if (!item) return;
 
     if (!element) {
-      dispatch(
-        addItem({
-          ...item,
-          count: 1
-        })
-      );
+      dispatch(addItem({ ...item, count: 1 }));
 
       setAlert(true);
 
@@ -83,53 +60,37 @@ export default function Product() {
     if (!item) return;
 
     if (!element) {
-      dispatch(
-        addItem({
-          ...item,
-          count: 1
-        })
-      );
+      dispatch(addItem({ ...item, count: 1 }));
     }
 
     navigate("/checkout");
   };
 
-  // Loading Screen
+  // 🔄 LOADING SCREEN
   if (loading) {
     return (
       <div className="vh-100 d-flex flex-column justify-content-center align-items-center">
-
         <div className="position-absolute top-0 start-0 m-3">
           <BackButton />
         </div>
 
         <div className="text-center">
-
           <div className="spinner-border"></div>
-
-          <h4 className="mt-3">
-            Loading Product...
-          </h4>
-
+          <h4 className="mt-3">Loading Product...</h4>
         </div>
-
       </div>
     );
   }
 
-  // Product not found
+  // ❌ NOT FOUND
   if (!item) {
     return (
       <div className="container">
-
         <div className="mt-3">
           <BackButton />
         </div>
 
-        <h3 className="text-center mt-5">
-          Product Not Found
-        </h3>
-
+        <h3 className="text-center mt-5">Product Not Found</h3>
       </div>
     );
   }
@@ -137,68 +98,54 @@ export default function Product() {
   return (
     <div className="container">
       <div
-  style={{
-    position: "fixed",
-    top: "20px",
-    left: "20px",
-    zIndex: 1000
-  }}
->
-  <BackButton />
-</div>
+        style={{
+          position: "fixed",
+          top: "20px",
+          left: "20px",
+          zIndex: 1000,
+        }}
+      >
+        <BackButton />
+      </div>
 
-
+      {/* ALERT */}
       {alert && (
         <div
           className="alert alert-success position-fixed top-0 end-0 m-4 shadow"
-          style={{
-            width: "250px",
-            zIndex: 1000
-          }}
+          style={{ width: "250px", zIndex: 1000 }}
         >
           ✅ Item Added To Cart
         </div>
       )}
 
       <div className="d-flex justify-content-center">
-
-        <div
-          className="card m-5 p-3"
-          style={{
-            width: "350px"
-          }}
-        >
-
+        <div className="card m-5 p-3" style={{ width: "350px" }}>
+          
+          {/* ✅ IMAGE FIXED */}
           <img
             src={item.image}
             alt={item.title}
             height={250}
             className="card-img-top"
-            style={{
-              objectFit: "contain"
+            style={{ objectFit: "contain" }}
+            onError={(e) => {
+              e.target.src =
+                "https://via.placeholder.com/250?text=No+Image";
             }}
           />
 
           <div className="card-body text-center">
+            <h5 className="card-title">{item.title}</h5>
 
-            <h5 className="card-title">
-              {item.title}
-            </h5>
+            <h6 className="mt-3">Price : ₹ {item.price}</h6>
 
-            <h6 className="mt-3">
-              Price : ₹ {item.price}
-            </h6>
-
-            <h6 className="mt-2">
-              Category : {item.category}
-            </h6>
+            <h6 className="mt-2">Category : {item.category}</h6>
 
             <h6 className="mt-2">
               Rating : {item.rating?.rate || 4.5}
             </h6>
 
             <div className="mt-4">
-
               <button
                 className="btn btn-success me-2"
                 onClick={buyNow}
@@ -207,33 +154,24 @@ export default function Product() {
               </button>
 
               {element?.count > 0 ? (
-
                 <button
                   className="btn btn-outline-warning ms-2"
                   onClick={() => navigate("/cart")}
                 >
                   Go To Cart
                 </button>
-
               ) : (
-
                 <button
                   className="btn btn-success ms-2"
                   onClick={addToCart}
                 >
                   Add To Cart
                 </button>
-
               )}
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

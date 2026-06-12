@@ -67,7 +67,7 @@ export default function Wishlist() {
           {wishlistItems.map((item) => (
             <div
               className="col-6 col-md-4 col-lg-3 mb-3"
-              key={item.id}
+              key={item._id}
             >
               <div
                 className="card p-3 text-center h-100"

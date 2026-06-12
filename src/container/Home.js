@@ -34,7 +34,10 @@ export default function Home() {
     setLoading(true);
 
     try {
+      
       const data = await getProducts();
+
+      console.log("API DATA =", data);
 
       setTimeout(() => {
         setProducts(data);
@@ -45,6 +48,7 @@ export default function Home() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div>

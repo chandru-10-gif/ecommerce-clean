@@ -62,7 +62,7 @@ export default function Cart() {
             {list.map((item) => (
 
               <ProductListItem
-                key={item.id}
+                key={item._id}
                 {...item}
 
                 incrementItem={(e) => {

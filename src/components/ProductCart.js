@@ -47,10 +47,17 @@ export default function ProductCart(props) {
       </button>
 
       <img
-        src={props.image}
-        alt={props.title}
-        className="product-image"
-      />
+  src={props.image}
+  alt={props.title}
+  style={{
+    width: "200px",
+    height: "200px",
+    border: "2px solid red",
+    objectFit: "cover"
+  }}
+  onError={() => console.log("FAILED IMAGE:", props.image)}
+  onLoad={() => console.log("IMAGE LOADED:", props.image)}
+/>
 
       <div className="d-flex flex-column justify-content-center align-items-center flex-grow-1">
         <h6 className="product-title">

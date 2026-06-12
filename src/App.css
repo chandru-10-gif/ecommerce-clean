@@ -275,7 +275,7 @@
   font-size: 12px;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* show only 2 lines */
+  -webkit-line-clamp: 4; /* show only 4 lines */
   -webkit-box-orient: vertical;
 
   overflow: hidden;

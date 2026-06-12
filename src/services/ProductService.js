@@ -1,34 +1,26 @@
 import axios from "axios";
 
- const API_URL = "https://fakestoreapi.com";
+const API_URL = "http://localhost:5000/api/products";
 
 
-
-console.log(API_URL, "api url ");
-
+// Get all products
 export const getProducts = async () => {
   try {
-    const response = await axios.get(`${API_URL}/products`);
-
+    const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
     console.log(error);
+    return [];
   }
 };
 
+// Get single product
 export const getSingleProduct = async (id) => {
   try {
-    // // delay API response by 3 sec
-    // await new Promise((resolve) =>
-    //   setTimeout(resolve,3000)
-    // );
-
-    const response = await axios.get(`${API_URL}/products/${id}`);
-
+    const response = await axios.get(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);
-
     return null;
   }
 };

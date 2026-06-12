@@ -17,7 +17,7 @@ export default function Checkout() {
   const incrementItem = (item) => {
 
     const index = state.findIndex(
-      (product) => product.id === item.id
+      (product) => product._id === item.id
     );
 
     setState((state) => [
@@ -41,7 +41,7 @@ export default function Checkout() {
     } else {
 
       const index = state.findIndex(
-        (product) => product.id === item.id
+        (product) => product._id === item.id
       );
 
       setState((state) => [
@@ -60,7 +60,7 @@ export default function Checkout() {
   const removeItemFromCart = (item) => {
 
     const index = state.findIndex(
-      (product) => product.id === item.id
+      (product) => product._id === item.id
     );
 
     setState((state) => [
