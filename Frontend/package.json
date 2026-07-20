@@ -1,0 +1,79 @@
+{
+  "name": "ecommerce-clean",
+  "version": "0.1.0",
+  "homepage": "https://chandru-10-gif.github.io/ecommerce-clean",
+  "private": true,
+  "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@iconify-react/mdi": "^1.0.2",
+    "@iconify/react": "^6.0.2",
+    "@reduxjs/toolkit": "^2.12.0",
+    "@supabase/supabase-js": "^2.110.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.17.0",
+    "bootstrap": "^5.3.8",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.3",
+    "react": "^19.2.7",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.2.7",
+    "react-hook-form": "^7.81.0",
+    "react-icons": "^5.7.0",
+    "react-loading-skeleton": "^3.5.0",
+    "react-paginate": "^8.3.0",
+    "react-redux": "^9.3.0",
+    "react-router-dom": "^7.16.0",
+    "react-scripts": "5.0.1",
+    "redux": "^5.0.1",
+    "uuid": "^14.0.1",
+    "web-vitals": "^2.1.4",
+    "yup": "^1.7.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "gh-pages": "^6.3.0",
+    "tailwindcss": "^4.3.2"
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chandru-10-gif/ecommerce-clean.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chandru-10-gif/ecommerce-clean/issues"
+  }
+}

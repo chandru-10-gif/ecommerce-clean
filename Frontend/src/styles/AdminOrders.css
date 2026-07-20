@@ -1,0 +1,20 @@
+.ao-stat-cancelled {
+  background: linear-gradient(135deg, #ff4d4d, #b30000);
+  color: white;
+}
+.ao-stat-card {
+  width: 240px;
+  height: 100px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+
+.ao-stat-cancelled {
+  background: linear-gradient(135deg, #ff6b6b, #d90429);
+  color: white;
+}

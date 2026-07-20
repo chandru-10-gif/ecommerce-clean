@@ -1,0 +1,48 @@
+.custom-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* PRIMARY */
+.custom-btn.primary {
+  background: #0d6efd;
+  color: white;
+}
+
+.custom-btn.primary:hover {
+  background: #0b5ed7;
+}
+
+/* DANGER */
+.custom-btn.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.custom-btn.danger:hover {
+  background: #bb2d3b;
+}
+
+/* WARNING */
+.custom-btn.warning {
+  background: #ffc107;
+  color: black;
+}
+
+.custom-btn.warning:hover {
+  background: #ffca2c;
+}
+
+/* SUCCESS */
+.custom-btn.success {
+  background: #198754;
+  color: white;
+}
+
+.custom-btn.success:hover {
+  background: #157347;
+}

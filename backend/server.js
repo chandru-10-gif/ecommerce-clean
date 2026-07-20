@@ -7,7 +7,9 @@ const { createClient } = require("@supabase/supabase-js");
 const app = express();
 
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000"
+}));
 app.use(express.json());
 
 const supabase = createClient(
@@ -20,6 +22,9 @@ app.get("/api/products", async (req, res) => {
   const { data, error } = await supabase
     .from("products")
     .select("*");
+
+      console.log("DATA:", data);
+  console.log("ERROR:", error);
 
   if (error) {
     return res.status(500).json(error);
