@@ -4,36 +4,61 @@ const express = require("express");
 const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
 
+const productRoutes = require("./routes/productRoutes");
+const registerRoutes = require("./Register");
+
 const app = express();
 
-
-app.use(cors({
-  origin: "http://localhost:3000"
-}));
+app.use(cors());
 app.use(express.json());
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY,
+  process.env.SUPABASE_KEY
 );
 
-// Get all products
-app.get("/api/products", async (req, res) => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*");
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-      console.log("DATA:", data);
-  console.log("ERROR:", error);
+globalSupabase = supabaseAdmin;
+
+// GET ALL PRODUCTS
+app.get("/api/products", async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const search = req.query.search || "";
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
+    .from("products")
+    .select("*", { count: "exact" });
+
+  if (search) {
+    query = query.ilike("title", `%${search}%`);
+  }
+
+  const { data, count, error } = await query
+    .range(from, to);
 
   if (error) {
     return res.status(500).json(error);
   }
 
-  res.json(data);
+  res.json({
+    products: data,
+    total: count,
+    page,
+    limit,
+    totalPages: Math.ceil(count / limit),
+  });
 });
 
-// Get single product
+
+// GET SINGLE PRODUCT
 app.get("/api/products/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -44,28 +69,18 @@ app.get("/api/products/:id", async (req, res) => {
     .single();
 
   if (error) {
-    return res.status(500).json(error);
+    return res.status(404).json(error);
   }
 
   res.json(data);
 });
+
+// CREATE / UPDATE / DELETE
+app.use("/api/products", productRoutes);
+
+// REGISTER
+app.use(registerRoutes);
+
 app.listen(5000, () => {
   console.log("Server Running On Port 5000");
-});
-
-app.get("/test", async (req, res) => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*");
-
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
-
-  res.json({ data, error });
-});
-
-app.get("/debug", (req, res) => {
-  res.json({
-    url: process.env.SUPABASE_URL
-  });
 });
