@@ -1,7 +1,7 @@
 import axios from "axios";
 import { supabase } from "./supabase";
 
-const API = "http://localhost:5000/api";
+const API = "https://ecommerce-backend-qkpp.onrender.com";
 
 // LOGIN
 export const loginUser = async (email, password) => {

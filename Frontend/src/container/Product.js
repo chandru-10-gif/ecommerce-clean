@@ -4,9 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { addItem } from "../redux/reducer/Cart";
 import { getSingleProduct } from "../services/ProductService";
 import BackButton from "./BackButton";
+import { supabase } from "../services/supabase";
 
 export default function Product() {
   const { id } = useParams();
+  const [reviews, setReviews] = useState([]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -19,24 +21,55 @@ export default function Product() {
 
   // ✅ FETCH PRODUCT (ONLY ONE useEffect)
   useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        setLoading(true);
 
-        const data = await getSingleProduct(id);
+  const loadProduct = async () => {
 
-        console.log("PRODUCT DATA:", data); // ✅ DEBUG HERE
+    try {
 
-        setItem(data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setLoading(true);
 
-    loadProduct();
-  }, [id]);
+      const data = await getSingleProduct(id);
+
+      setItem(data);
+
+    } catch(error){
+
+      console.log(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+  loadProduct();
+  fetchReviews();
+
+
+}, [id]);
+  const fetchReviews = async () => {
+
+  const { data, error } = await supabase
+    .from("product_reviews")
+    .select("*")
+    .eq("product_id", id)
+    .order("created_at", {
+      ascending:false
+    });
+
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+
+  setReviews(data || []);
+
+};
 
   const element = item
     ? list.find((el) => el.id === item.id)
