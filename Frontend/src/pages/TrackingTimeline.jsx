@@ -41,6 +41,8 @@ export default function TrackingTimeline({ status }) {
     (step) => step.title === status
   );
 
+  const isReturnStatus = ["Return Requested", "Return Rejected", "Returned"].includes(status);
+  const effectiveStep = isReturnStatus ? steps.length - 1 : currentStep;
 
   return (
 
@@ -54,9 +56,9 @@ export default function TrackingTimeline({ status }) {
         className="tracking-line-progress"
         style={{
           width:
-            currentStep === 0
+            effectiveStep <= 0
               ? "0%"
-              : `${(currentStep / (steps.length - 1)) * 100}%`,
+              : `${(effectiveStep / (steps.length - 1)) * 100}%`,
         }}
       />
 
@@ -75,7 +77,7 @@ export default function TrackingTimeline({ status }) {
 
             <div
               className={
-                index <= currentStep
+                index <= effectiveStep
                   ? "tracking-icon active"
                   : "tracking-icon"
               }
@@ -89,7 +91,7 @@ export default function TrackingTimeline({ status }) {
 
             <p
               className={
-                index <= currentStep
+                index <= effectiveStep
                   ? "tracking-text active"
                   : "tracking-text"
               }
@@ -108,6 +110,24 @@ export default function TrackingTimeline({ status }) {
 
 
       </div>
+
+      {isReturnStatus && (
+        <div style={{ textAlign: "center", marginTop: "15px" }}>
+          <span style={{
+            display: "inline-block",
+            padding: "6px 16px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: "600",
+            background: status === "Return Requested" ? "#fff3cd" : status === "Returned" ? "#d1e7dd" : "#f8d7da",
+            color: status === "Return Requested" ? "#856404" : status === "Returned" ? "#0f5132" : "#dc3545",
+          }}>
+            {status === "Return Requested" && "🔄 Return Request Under Review"}
+            {status === "Return Rejected" && "✕ Return Request Rejected"}
+            {status === "Returned" && "✓ Return Approved — Refund Processed"}
+          </span>
+        </div>
+      )}
 
 
     </div>

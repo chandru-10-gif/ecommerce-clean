@@ -80,6 +80,47 @@ export const addressSchema = yup.object().shape({
   is_default: yup.boolean().default(false),
 });
 
+export const otpSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Enter a valid email address"),
+  token: yup
+    .string()
+    .required("OTP is required")
+    .matches(/^\d{6}$/, "OTP must be 6 digits"),
+});
+
+export const vendorRegisterSchema = yup.object().shape({
+  name: yup
+    .string()
+    .required("Name is required")
+    .matches(/^[A-Za-z\s]{2,}$/, "Enter a valid name (letters only, min 2 characters)"),
+  phone: yup
+    .string()
+    .required("Phone is required")
+    .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number"),
+  address: yup
+    .string()
+    .required("Address is required")
+    .min(5, "Enter a valid address (min 5 characters)"),
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Enter a valid email address"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(6, "Password must be at least 6 characters"),
+  shop_name: yup
+    .string()
+    .required("Shop name is required")
+    .min(2, "Shop name must be at least 2 characters"),
+  shop_description: yup
+    .string()
+    .default(""),
+});
+
 export const productSchema = yup.object().shape({
   title: yup
     .string()
@@ -103,4 +144,12 @@ export const productSchema = yup.object().shape({
     .required("Stock is required")
     .min(0, "Stock cannot be negative")
     .integer("Stock must be a whole number"),
+  offer_price: yup
+    .number()
+    .typeError("Offer price must be a number")
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" ? null : value
+    ),
+  is_offer: yup.boolean().default(false),
 });

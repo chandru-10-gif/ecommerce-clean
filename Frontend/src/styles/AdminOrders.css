@@ -18,3 +18,26 @@
   background: linear-gradient(135deg, #ff6b6b, #d90429);
   color: white;
 }
+
+@media (max-width: 767px) {
+  .ao-stat-card {
+    width: 100%;
+    height: 80px;
+    border-radius: 14px;
+  }
+}
+
+/* ===== SMALL PHONES 320px - 425px ===== */
+@media (max-width: 425px) {
+  .ao-stat-cancelled {
+    background: linear-gradient(135deg, #ff4d4d, #b30000);
+    color: white;
+  }
+
+  .ao-stat-card {
+    width: 100% !important;
+    height: 70px !important;
+    border-radius: 10px !important;
+    padding: 8px !important;
+  }
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { profileSchema } from "../validations/formSchemas";
@@ -7,14 +7,24 @@ export default function ProfileForm({ initialValues, onSubmit, loading }) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(profileSchema),
     defaultValues: {
-      name: initialValues?.name || "",
-      phone: initialValues?.phone || "",
+      name: "",
+      phone: "",
     },
   });
+
+  useEffect(() => {
+    if (initialValues) {
+      reset({
+        name: initialValues.name || "",
+        phone: initialValues.phone || "",
+      });
+    }
+  }, [initialValues, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

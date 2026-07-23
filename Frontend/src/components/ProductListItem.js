@@ -13,7 +13,7 @@ style={{
       <img
         src={props.image}
         alt={props.title}
-        className="mb-3 mb-md-0 me-md-4"
+        className="mb-3 mb-md-0 me-md-4 product-list-image"
         style={{
           width: "150px",
           height: "150px",
@@ -24,7 +24,18 @@ style={{
       <div className="flex-grow-1 text-center text-md-start">
         <h5>{props.title}</h5>
 
-        <h6>Price: ₹ {props.price}</h6>
+        {props.original_price && props.original_price !== props.price ? (
+          <h6>
+            <span style={{ textDecoration: "line-through", color: "#999", marginRight: "8px" }}>
+              ₹ {props.original_price}
+            </span>
+            <span style={{ color: "#ff4444", fontWeight: "700" }}>
+              ₹ {props.price}
+            </span>
+          </h6>
+        ) : (
+          <h6>Price: ₹ {props.price}</h6>
+        )}
 
         <h6>Category: {props.category}</h6>
 

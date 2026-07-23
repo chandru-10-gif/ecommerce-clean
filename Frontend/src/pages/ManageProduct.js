@@ -16,7 +16,7 @@ export default function ManageProducts() {
 
   const loadProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products", {
+      const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/products`, {
         params: { limit: 100 },
       });
       setProducts(res.data.products);
@@ -28,7 +28,7 @@ export default function ManageProducts() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this product?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/products/${id}`);
       loadProducts();
     } catch (err) {
       console.log("Delete error:", err);
@@ -123,14 +123,16 @@ export default function ManageProducts() {
               style={{ animationDelay: `${index * 0.06}s` }}
             >
               <div className="amp-card-image-wrap">
-                <img
-                  src={item.image || "https://via.placeholder.com/250"}
-                  alt={item.title}
-                  className="amp-card-image"
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/250?text=No+Image";
-                  }}
-                />
+               <img
+  src={item.image || "https://via.placeholder.com/250"}
+  alt={item.title}
+  className="amp-card-image"
+  style={{ cursor: "pointer" }}
+  onClick={() => navigate(`/product/${item.id || item._id}`)}
+  onError={(e) => {
+    e.target.src = "https://via.placeholder.com/250?text=No+Image";
+  }}
+/>
                 <span className="amp-card-category">{item.category || "Uncategorized"}</span>
                 {Number(item.stock) <= 5 && (
                   <span className="amp-card-low-stock">Low Stock</span>

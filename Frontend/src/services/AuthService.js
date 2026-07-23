@@ -36,3 +36,25 @@ export const logoutUser = async () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 };
+
+// OTP - Send
+export const sendOtp = async (email) => {
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+// OTP - Verify
+export const verifyOtp = async (email, token) => {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+
+  if (error) throw error;
+  return data;
+};

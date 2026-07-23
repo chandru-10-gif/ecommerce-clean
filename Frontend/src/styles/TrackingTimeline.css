@@ -131,14 +131,14 @@
 
 
 
-@media(max-width:768px){
+@media(max-width:767px){
 
 
 .tracking-container{
 
   flex-direction:column;
 
-  gap:25px;
+  gap:20px;
 
 }
 
@@ -151,7 +151,7 @@
 
   align-items:center;
 
-  gap:15px;
+  gap:12px;
 
 }
 
@@ -159,7 +159,15 @@
 .tracking-text{
 
  margin:0;
+ font-size: 13px;
 
+}
+
+
+.tracking-icon {
+  width: 45px;
+  height: 45px;
+  font-size: 18px;
 }
 
 
@@ -170,5 +178,33 @@
 
 }
 
+
+}
+
+
+/* ===== SMALL PHONES 320px - 425px ===== */
+@media(max-width:425px){
+
+.tracking-wrapper{
+  padding:15px 5px !important;
+}
+
+.tracking-container{
+  gap:14px !important;
+}
+
+.tracking-item{
+  gap:8px !important;
+}
+
+.tracking-icon{
+  width:36px !important;
+  height:36px !important;
+  font-size:15px !important;
+}
+
+.tracking-text{
+  font-size:11px !important;
+}
 
 }

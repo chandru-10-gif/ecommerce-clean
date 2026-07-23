@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { uploadProductImage } from "../services/storageService";
 import { productSchema } from "../validations/formSchemas";
+import { categories } from "./CategorySection";
 
 export default function AddProduct({ onSuccess }) {
   const [imageFile, setImageFile] = useState(null);
@@ -13,6 +14,7 @@ export default function AddProduct({ onSuccess }) {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(productSchema),
@@ -22,8 +24,12 @@ export default function AddProduct({ onSuccess }) {
       category: "",
       description: "",
       stock: "",
+      offer_price: "",
+      is_offer: false,
     },
   });
+
+  const isOffer = watch("is_offer");
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -41,7 +47,7 @@ export default function AddProduct({ onSuccess }) {
         image: imageUrl,
       };
 
-      await axios.post("http://localhost:5000/api/products", newProduct, {
+      await axios.post(`${process.env.REACT_APP_BASE_URL}/api/products`, newProduct, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -66,6 +72,7 @@ export default function AddProduct({ onSuccess }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div
+        className="form-grid-2col"
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}
       >
         <div>
@@ -94,6 +101,7 @@ export default function AddProduct({ onSuccess }) {
       </div>
 
       <div
+        className="form-grid-2col"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -103,11 +111,19 @@ export default function AddProduct({ onSuccess }) {
       >
         <div>
           <label className="form-label">Category</label>
-          <input
+          <select
             className={`form-control ${errors.category ? "is-invalid" : ""}`}
-            placeholder="e.g. Electronics"
             {...register("category")}
-          />
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <optgroup key={cat.name} label={cat.name}>
+                {cat.subcategories.map((sub) => (
+                  <option key={sub.value} value={sub.value}>{sub.name}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
           {errors.category && (
             <div className="invalid-feedback">{errors.category.message}</div>
           )}
@@ -148,6 +164,35 @@ export default function AddProduct({ onSuccess }) {
           accept="image/*"
           onChange={(e) => setImageFile(e.target.files[0])}
         />
+      </div>
+
+      <div style={{ marginTop: "14px", padding: "14px", background: "#f8f9fa", borderRadius: "10px", border: "1px solid #e0e0e0" }}>
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            id="is_offer"
+            {...register("is_offer")}
+            style={{ width: "18px", height: "18px", cursor: "pointer" }}
+          />
+          <label className="form-label mb-0" htmlFor="is_offer" style={{ fontWeight: "600", cursor: "pointer" }}>
+            Mark as Offer Product
+          </label>
+        </div>
+        {isOffer && (
+          <div>
+            <label className="form-label">Offer Price</label>
+            <input
+              type="number"
+              className={`form-control ${errors.offer_price ? "is-invalid" : ""}`}
+              placeholder="Discounted price"
+              {...register("offer_price")}
+            />
+            {errors.offer_price && (
+              <div className="invalid-feedback">{errors.offer_price.message}</div>
+            )}
+          </div>
+        )}
       </div>
 
       <button

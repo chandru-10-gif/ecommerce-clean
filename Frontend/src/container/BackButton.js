@@ -1,24 +1,21 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Icon } from "@iconify/react";
 
+export default function BackButton(){
 
-export default function BackButton() {
   const navigate = useNavigate();
 
   return (
-    <div
-      style={{
-        width: "100%",
-        display: "flex",
-        justifyContent: "flex-start",
-        marginBottom: "15px",
-      }}
+    <button
+      className="back-btn"
+      onClick={()=>navigate(-1)}
     >
-      <button
-        className="btn btn-dark"
-        onClick={() => navigate(-1)}
-      >
-        ← 
-      </button>
-    </div>
+      <Icon 
+        icon="mdi:arrow-left"
+        width="18"
+      />
+      Back
+    </button>
   );
 }

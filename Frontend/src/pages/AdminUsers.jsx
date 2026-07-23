@@ -61,7 +61,7 @@ export default function AdminUsers() {
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
-              <td>{user.user_code}</td>
+              <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
 
@@ -98,7 +98,7 @@ export default function AdminUsers() {
 
               <p>
                 <strong>User Code:</strong>{" "}
-                {selectedUser.user_code}
+                {selectedUser.name}
               </p>
 
               <p>
@@ -210,7 +210,7 @@ export default function AdminUsers() {
           <p>
             <strong>User Code:</strong>
             {" "}
-            {selectedUser?.user_code}
+            {selectedUser?.name}
           </p>
 
           <p>

@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../services/AuthService";
-import { supabase } from "../services/supabase";
+import { vendorLogin } from "../services/VendorService";
 import loginImage from "../image/3230.jpg";
 import { loginSchema } from "../validations/formSchemas";
 
-export default function Login() {
+export default function VendorLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -27,32 +26,16 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const result = await loginUser(data.email, data.password);
+      const result = await vendorLogin(data.email, data.password);
 
-      localStorage.setItem("token", result.session.access_token);
+      localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem("role", "vendor");
+      localStorage.setItem("shopName", result.user.shop_name || "");
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", result.user.id)
-        .single();
-
-      if (!profileError && profile) {
-        localStorage.setItem("role", profile.role || "");
-        localStorage.setItem("name", profile.name || "");
-        localStorage.setItem("profileName", profile.name || "");
-      }
-
-      if (profile.role === "vendor") {
-        navigate("/vendor");
-      } else if (profile.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      navigate("/vendor");
     } catch (error) {
-      alert(error.message || "Invalid email or password");
+      alert(error.response?.data?.error || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -69,7 +52,7 @@ export default function Login() {
       >
         <img
           src={loginImage}
-          alt="Login"
+          alt="Vendor Login"
           className="img-fluid"
           style={{
             height: "180px",
@@ -80,7 +63,7 @@ export default function Login() {
           }}
         />
 
-        <h2 className="text-center mb-4">Login</h2>
+        <h2 className="text-center mb-4">Vendor Login</h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
@@ -120,26 +103,16 @@ export default function Login() {
           className="mt-3 text-center"
           style={{ fontSize: "14px", color: "gray" }}
         >
-          Welcome to E-Commerce
+          Vendor Portal - E-Commerce
         </div>
 
         <div className="mt-2 text-center" style={{ fontSize: "14px" }}>
-          Don't have an account?{" "}
+          Don't have a vendor account?{" "}
           <span
             style={{ color: "blue", cursor: "pointer" }}
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/vendor-register")}
           >
             Register
-          </span>
-        </div>
-
-        <div className="mt-2 text-center" style={{ fontSize: "14px" }}>
-          Are you a Vendor?{" "}
-          <span
-            style={{ color: "blue", cursor: "pointer" }}
-            onClick={() => navigate("/vendor-login")}
-          >
-            Login here
           </span>
         </div>
       </div>

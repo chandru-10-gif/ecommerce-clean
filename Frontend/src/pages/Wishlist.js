@@ -64,13 +64,13 @@ export default function Wishlist() {
         <h4>No products in wishlist</h4>
       ) : (
         <div className="row">
-          {wishlistItems.map((item) => (
-            <div
-              className="col-6 col-md-4 col-lg-3 mb-3"
-              key={item._id}
-            >
+         {wishlistItems.map((item) => (
+  <div
+    className="col-6 col-md-4 col-lg-3 mb-3"
+    key={item.id || item._id}
+  >
               <div
-                className="card p-3 text-center h-100"
+                className="card p-3 text-center h-100 wishlist-card"
                 style={{
                   minHeight: "350px",
                 }}

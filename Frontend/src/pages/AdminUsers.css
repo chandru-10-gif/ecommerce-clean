@@ -116,3 +116,82 @@
 
   padding: 30px;
 }
+
+@media (max-width: 767px) {
+  .admin-users-container {
+    padding: 12px !important;
+  }
+
+  .admin-users-container h1 {
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+
+  .user-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  .user-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .user-card h3 {
+    font-size: 12px;
+  }
+
+  .user-card p {
+    font-size: 14px;
+  }
+
+  .order-details-panel {
+    left: 0 !important;
+    right: 0 !important;
+    padding: 15px !important;
+  }
+
+  .status {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* ===== SMALL PHONES 320px - 425px ===== */
+@media (max-width: 425px) {
+  .admin-users-container {
+    padding: 8px !important;
+  }
+
+  .admin-users-container h1 {
+    font-size: 16px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .user-list {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .user-card {
+    padding: 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .user-card h3 {
+    font-size: 10px !important;
+  }
+
+  .user-card p {
+    font-size: 12px !important;
+  }
+
+  .order-details-panel {
+    padding: 8px !important;
+  }
+
+  .status {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
+  }
+}

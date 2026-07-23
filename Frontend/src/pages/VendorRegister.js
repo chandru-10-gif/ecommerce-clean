@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { vendorRegister } from "../services/VendorService";
+import { vendorRegisterSchema } from "../validations/formSchemas";
 
-export default function Register() {
+export default function VendorRegister() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("user");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
+    resolver: yupResolver(vendorRegisterSchema),
     defaultValues: {
       name: "",
       phone: "",
@@ -29,24 +30,18 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const payload = {
+      const res = await vendorRegister({
         name: data.name.trim(),
         phone: data.phone.trim(),
         address: data.address.trim(),
         email: data.email.trim(),
         password: data.password,
-        role: selectedRole,
-      };
+        shop_name: data.shop_name.trim(),
+        shop_description: data.shop_description?.trim() || "",
+      });
 
-      if (selectedRole === "vendor") {
-        payload.shop_name = data.shop_name?.trim() || "";
-        payload.shop_description = data.shop_description?.trim() || "";
-      }
-
-      const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/register`, payload);
-
-      alert(res.data.message || "Registered successfully");
-      navigate("/login");
+      alert(res.message || "Vendor registered successfully");
+      navigate("/vendor-login");
     } catch (err) {
       console.log(err);
       alert(err.response?.data?.error || "Registration failed");
@@ -76,48 +71,9 @@ export default function Register() {
           boxShadow: "0 0 10px rgba(0,0,0,0.1)",
         }}
       >
-        <h2 style={{ textAlign: "center" }}>Register</h2>
+        <h2 style={{ textAlign: "center" }}>Vendor Register</h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div style={{ display: "flex", gap: "8px", margin: "10px 0" }}>
-            <button
-              type="button"
-              onClick={() => setSelectedRole("user")}
-              style={{
-                flex: 1,
-                padding: "10px",
-                border: selectedRole === "user" ? "2px solid blue" : "1px solid #ccc",
-                background: selectedRole === "user" ? "#e8f0fe" : "#fff",
-                color: selectedRole === "user" ? "blue" : "#333",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-                fontSize: "14px",
-                transition: "all 0.2s",
-              }}
-            >
-              User
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedRole("vendor")}
-              style={{
-                flex: 1,
-                padding: "10px",
-                border: selectedRole === "vendor" ? "2px solid blue" : "1px solid #ccc",
-                background: selectedRole === "vendor" ? "#e8f0fe" : "#fff",
-                color: selectedRole === "vendor" ? "blue" : "#333",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-                fontSize: "14px",
-                transition: "all 0.2s",
-              }}
-            >
-              Vendor
-            </button>
-          </div>
-
           <div>
             <input
               type="text"
@@ -127,7 +83,9 @@ export default function Register() {
               {...register("name")}
             />
             {errors.name && (
-              <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
                 {errors.name.message}
               </div>
             )}
@@ -143,7 +101,9 @@ export default function Register() {
               {...register("phone")}
             />
             {errors.phone && (
-              <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
                 {errors.phone.message}
               </div>
             )}
@@ -158,7 +118,9 @@ export default function Register() {
               {...register("address")}
             />
             {errors.address && (
-              <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
                 {errors.address.message}
               </div>
             )}
@@ -173,7 +135,9 @@ export default function Register() {
               {...register("email")}
             />
             {errors.email && (
-              <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
                 {errors.email.message}
               </div>
             )}
@@ -188,40 +152,40 @@ export default function Register() {
               {...register("password")}
             />
             {errors.password && (
-              <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
                 {errors.password.message}
               </div>
             )}
           </div>
 
-          {selectedRole === "vendor" && (
-            <>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Shop Name"
-                  className={`form-control ${errors.shop_name ? "is-invalid" : ""}`}
-                  style={{ width: "100%", padding: "10px", margin: "10px 0" }}
-                  {...register("shop_name", { required: selectedRole === "vendor" ? "Shop name is required" : false })}
-                />
-                {errors.shop_name && (
-                  <div style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}>
-                    {errors.shop_name.message}
-                  </div>
-                )}
+          <div>
+            <input
+              type="text"
+              placeholder="Shop Name"
+              className={`form-control ${errors.shop_name ? "is-invalid" : ""}`}
+              style={{ width: "100%", padding: "10px", margin: "10px 0" }}
+              {...register("shop_name")}
+            />
+            {errors.shop_name && (
+              <div
+                style={{ color: "red", fontSize: "12px", margin: "0 0 5px 0" }}
+              >
+                {errors.shop_name.message}
               </div>
+            )}
+          </div>
 
-              <div>
-                <textarea
-                  placeholder="Shop Description (optional)"
-                  className="form-control"
-                  style={{ width: "100%", padding: "10px", margin: "10px 0", resize: "vertical" }}
-                  rows="2"
-                  {...register("shop_description")}
-                />
-              </div>
-            </>
-          )}
+          <div>
+            <textarea
+              placeholder="Shop Description (optional)"
+              className="form-control"
+              style={{ width: "100%", padding: "10px", margin: "10px 0", resize: "vertical" }}
+              rows="2"
+              {...register("shop_description")}
+            />
+          </div>
 
           <button
             type="submit"
@@ -229,24 +193,21 @@ export default function Register() {
             style={{
               width: "100%",
               padding: "10px",
-              background: "linear-gradient(135deg, #667eea, #764ba2)",
+              background: "blue",
               color: "white",
               border: "none",
-              borderRadius: "8px",
               cursor: "pointer",
-              fontWeight: "600",
-              fontSize: "15px",
             }}
           >
-            {loading ? "Registering..." : selectedRole === "vendor" ? "Register as Vendor" : "Register"}
+            {loading ? "Registering..." : "Register as Vendor"}
           </button>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: "10px", fontSize: "13px" }}>
-          Already have an account?{" "}
+        <p style={{ textAlign: "center", marginTop: "10px" }}>
+          Already a vendor?{" "}
           <span
             style={{ color: "blue", cursor: "pointer" }}
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/vendor-login")}
           >
             Login
           </span>

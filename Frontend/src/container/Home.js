@@ -12,6 +12,7 @@ import Dashboard from "./Dashboard";
 import Product from "./Product";
 import Cart from "./Cart";
 import Checkout from "./Checkout";
+import Payment from "./Payment";
 import Success from "./Success";
 import EditAddress from "../pages/EditAddress";
 import Profile from "../pages/Profile";
@@ -26,13 +27,27 @@ import AddProduct from "../pages/AddProduct";
 import ManageProduct from "../pages/ManageProduct";
 import EditProduct from "../pages/EditProduct";
 import AdminOrders from "../pages/AdminOrders";
+import AdminCoupons from "../pages/AdminCoupons";
 import MyOrders from "../pages/MyOrders";
 import ResetPassword from "../pages/ResetPassword";
 import OrderDetails from "../pages/OrderDetail";
+import CategorySection from "../pages/CategorySection";
+import CategoryPage from "../pages/CategoryPage";
+import AdminOffers from "../pages/AdminOffers";
 
 import AdminUsers from "../pages/AdminUsers";
 
+import VendorLogin from "../pages/VendorLogin";
+import VendorRegister from "../pages/VendorRegister";
+import VendorLayout from "../pages/VendorLayout";
+import VendorDashboard from "../pages/VendorDashboard";
+import VendorProducts from "../pages/VendorProducts";
+import VendorAddProduct from "../pages/VendorAddProduct";
+import VendorEditProduct from "../pages/VendorEditProduct";
+import AdminVendorProducts from "../pages/AdminVendorProducts";
+
 import { getProducts } from "../services/ProductService";
+import CategoryProducts from "../pages/CategoryProducts";
 
 export default function Home() {
   const location = useLocation();
@@ -55,33 +70,40 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(8);
 
+  // Filters
+  const [category, setCategory] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [inStock, setInStock] = useState(false);
+
   useEffect(() => {
     setToken(Boolean(localStorage.getItem("token")));
   }, [location.pathname]);
 
   const hideHeader =
     location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/vendor") ||
     location.pathname === "/login" ||
     location.pathname === "/register";
 
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line
-  }, [token, page, search, limit]);
+  }, [token, page, search, limit, category, sortBy, inStock]);
 
   useEffect(() => {
     setPage(1);
-  }, [search]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [limit]);
+  }, [search, limit, category, sortBy, inStock]);
 
   const loadProducts = async () => {
     setLoading(true);
 
     try {
-      const response = await getProducts(page, limit, search);
+      const filters = {};
+      if (category) filters.category = category;
+      if (sortBy) filters.sort = sortBy;
+      if (inStock) filters.inStock = inStock;
+
+      const response = await getProducts(page, limit, search, filters);
 
       setProducts(response.products);
       setTotalPages(response.totalPages);
@@ -166,6 +188,12 @@ export default function Home() {
                   setSingleProductLoading={
                     setSingleProductLoading
                   }
+                  category={category}
+                  setCategory={setCategory}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  inStock={inStock}
+                  setInStock={setInStock}
                 />
               ) : (
                 <Navigate to="/login" />
@@ -177,7 +205,10 @@ export default function Home() {
             path="/product/:id"
             element={<Product />}
           />
-
+<Route
+  path="/category/:categoryName"
+  element={<CategoryProducts />}
+/>
           <Route
             path="/cart"
             element={<Cart />}
@@ -186,6 +217,11 @@ export default function Home() {
           <Route
             path="/checkout"
             element={<Checkout />}
+          />
+
+          <Route
+            path="/payment"
+            element={<Payment />}
           />
 
           <Route
@@ -252,12 +288,40 @@ export default function Home() {
             />
 
             <Route
+              path="offers"
+              element={<AdminOffers />}
+            />
+
+            <Route
+              path="coupons"
+              element={<AdminCoupons />}
+            />
+
+            <Route
               path="edit/:id"
               element={<EditProduct />}
             />
 
+            <Route
+              path="vendor-products"
+              element={<AdminVendorProducts />}
+            />
+
  
           </Route>
+
+          {/* VENDOR AUTH */}
+          <Route path="/vendor-login" element={<VendorLogin />} />
+          <Route path="/vendor-register" element={<VendorRegister />} />
+
+          {/* VENDOR PANEL */}
+          <Route path="/vendor" element={<VendorLayout />}>
+            <Route index element={<VendorDashboard />} />
+            <Route path="products" element={<VendorProducts />} />
+            <Route path="add-product" element={<VendorAddProduct />} />
+            <Route path="edit-product/:id" element={<VendorEditProduct />} />
+          </Route>
+
                      <Route
  path="/reset-password"
  element={<ResetPassword/>}

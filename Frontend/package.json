@@ -1,7 +1,7 @@
 {
   "name": "ecommerce-clean",
   "version": "0.1.0",
-  "homepage": "https://chandru-10-gif.github.io/ecommerce-clean",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

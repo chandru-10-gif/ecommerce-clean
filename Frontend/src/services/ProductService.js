@@ -1,17 +1,23 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = `${process.env.REACT_APP_BASE_URL}/api/products`;
 
-// Get products with pagination + search
-export const getProducts = async (page = 1, limit = 8, search = "") => {
+// Get products with pagination + search + filters
+export const getProducts = async (page = 1, limit = 8, search = "", filters = {}) => {
   try {
-    const response = await axios.get(API_URL, {
-      params: {
-        page,
-        limit,
-        search,
-      },
-    });
+    const params = {
+      page,
+      limit,
+      search,
+    };
+
+    if (filters.category) params.category = filters.category;
+    if (filters.minPrice) params.minPrice = filters.minPrice;
+    if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+    if (filters.sort) params.sort = filters.sort;
+    if (filters.inStock) params.inStock = filters.inStock;
+
+    const response = await axios.get(API_URL, { params });
 
     return response.data;
   } catch (error) {

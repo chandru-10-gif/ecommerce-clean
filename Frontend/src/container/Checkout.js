@@ -4,6 +4,7 @@ import ProductListItem from "../components/ProductListItem";
 import { useNavigate, useLocation } from "react-router-dom";
 import BackButton from "./BackButton";
 import { supabase } from "../services/supabase";
+import AddressModal from "../customcomponents/AddressModal";
 
 export default function Checkout() {
   const list = useSelector((state) => state.cart.list);
@@ -15,12 +16,41 @@ export default function Checkout() {
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchAddresses();
+    fetchCurrentPrices();
   }, []);
+
+  async function fetchCurrentPrices() {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/api/products?limit=500`);
+      const data = await res.json();
+      const products = data.products || [];
+      const map = {};
+      products.forEach(p => { map[p.id] = p; });
+
+      setState(prev => prev.map(item => {
+        const fresh = map[item.id];
+        if (fresh) {
+          const hasOffer = (String(fresh.is_offer).toLowerCase() === "true" || fresh.is_offer === true || fresh.is_offer === 1) && fresh.offer_price && Number(fresh.offer_price) > 0;
+          return {
+            ...item,
+            price: hasOffer ? Number(fresh.offer_price) : fresh.price,
+            original_price: fresh.price,
+            is_offer: fresh.is_offer,
+            offer_price: fresh.offer_price,
+          };
+        }
+        return item;
+      }));
+    } catch (err) {
+      console.log("Could not fetch fresh prices", err);
+    }
+  }
 
   async function fetchAddresses() {
     const {
@@ -89,108 +119,75 @@ const removeItemFromCart = (item) => {
 };
 
   const placeOrder = async () => {
-  try {
+    const user = JSON.parse(localStorage.getItem("user"));
 
-   const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    if (!user) {
+      alert("Please login first");
+      navigate("/login");
+      return;
+    }
 
-    console.log("Session:", session);
-    console.log("CART ITEMS:", state);
+    if (!selectedAddressId) {
+      alert("Please select a delivery address");
+      return;
+    }
 
-    // Get logged-in user
-  const user = JSON.parse(
-  localStorage.getItem("user")
-);
+    // Check stock availability for all items
+    const stockWarnings = [];
+    for (const item of state) {
+      if (item.count > (item.stock || 0)) {
+        stockWarnings.push(
+          `"${item.title}" - You ordered ${item.count} but only ${item.stock || 0} available`
+        );
+      }
+    }
 
-if (!user) {
-  alert("Please login first");
-  navigate("/login");
-  return;
-}
+    if (stockWarnings.length > 0) {
+      alert(
+        "Some items have insufficient stock:\n\n" +
+        stockWarnings.join("\n") +
+        "\n\nPlease adjust quantities and try again."
+      );
+      return;
+    }
 
-if (!selectedAddressId) {
-  alert("Please select a delivery address");
-  return;
-}
+    const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
-
-
-    // Calculate total
-    const totalAmount = state.reduce(
-      (sum, item) => sum + item.price * item.count,
-      0
-    );
-
-    console.log("User:", user.id);
-    console.log("Total Amount:", totalAmount);
-
-    // Create order
-    const { data: order, error } = await supabase
-  .from("orders")
-  .insert({
-    user_id: user.id,
-    total_amount: totalAmount,
-    status: "Pending",
-    address_id: selectedAddressId,
-  })
-  .select()
-  .single();
-
-if (error) throw error;
-
-    console.log("Order Created:", order);
-
-    // Create order items
-    const orderItems = state.map((item) => ({
-      order_id: order.id,
-      product_id: item.id,
-      product_title: item.title,
-      image: item.image,
-      quantity: item.count,
-      price: item.price,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("order_items")
-      .insert(orderItems);
-
-    if (itemsError) throw itemsError;
-
-    console.log("Order Items Saved");
-
-    // Success page
-    navigate("/success");
-  } catch (err) {
-    console.error("Order Error:", err);
-    alert(err.message);
-  }
-};
+    navigate("/payment", {
+      state: {
+        items: state,
+        addressId: selectedAddressId,
+        address: selectedAddress,
+      },
+    });
+  };
   return (
     <div className="container">
       <div className="mt-3">
         <BackButton />
       </div>
 
-      <h4 className="mt-3 mb-3">Select Delivery Address</h4>
+      <div className="d-flex justify-content-between align-items-center">
+        <h4 className="mt-3 mb-3">Select Delivery Address</h4>
+        <button
+          className="btn btn-outline-primary btn-sm"
+          onClick={() => setShowAddressModal(true)}
+        >
+          + Add New Address
+        </button>
+      </div>
 
       {loadingAddresses ? (
         <p>Loading addresses...</p>
       ) : addresses.length === 0 ? (
         <div className="alert alert-warning">
           No addresses found.{" "}
-         <button
-  className="btn btn-link p-0"
-  onClick={() =>
-    navigate("/edit-profile", {
-      state:{
-        openAddress:true
-      }
-    })
-  }
->
- Add an address
-</button>
+          <button
+            className="btn btn-link p-0"
+            onClick={() => setShowAddressModal(true)}
+          >
+            Add an address
+          </button>
         </div>
       ) : (
         <div className="row mb-4">
@@ -257,14 +254,51 @@ if (error) throw error;
               />
             ))}
 
+            <div className="card w-100 mt-3 shadow-sm">
+              <div className="card-body">
+                <h5 className="fw-bold mb-3">Order Summary</h5>
+                {state.map((item) => (
+                  <div key={item.id} className="d-flex justify-content-between mb-2">
+                    <span>{item.title} x {item.count}</span>
+                    {item.original_price && item.original_price !== item.price ? (
+                      <span>
+                        <span style={{ textDecoration: "line-through", color: "#999", marginRight: "6px", fontSize: "13px" }}>
+                          ₹{item.original_price * item.count}
+                        </span>
+                        <strong>₹{item.price * item.count}</strong>
+                      </span>
+                    ) : (
+                      <strong>₹{item.price * item.count}</strong>
+                    )}
+                  </div>
+                ))}
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <strong>Total</strong>
+                  <strong className="text-success">
+                    ₹{state.reduce((sum, item) => sum + item.price * item.count, 0)}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
             <button className="btn btn-success mt-3" onClick={placeOrder}>
-              Place Order
+              Proceed to Payment
             </button>
           </>
         ) : (
           <h3 className="text-center">No items in the cart</h3>
         )}
       </div>
+
+      <AddressModal
+        show={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onSaved={async () => {
+          setShowAddressModal(false);
+          await fetchAddresses();
+        }}
+      />
     </div>
   );
 }

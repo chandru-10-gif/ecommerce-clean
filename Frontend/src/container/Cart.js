@@ -48,6 +48,9 @@ export default function Cart() {
   return (
 
     <div className="container">
+       <h2 className="cart-title">
+        🛒 My Cart
+      </h2>
 
       <div className="mt-3">
         <BackButton />
@@ -89,7 +92,7 @@ export default function Cart() {
 
             <button
   className="btn btn-success mt-3 w-100 w-md-auto"
-  onClick={() => navigate("/checkout")}
+  onClick={() => navigate("/checkout", { state: { items: list } })}
 >
   Go To Checkout
 </button>

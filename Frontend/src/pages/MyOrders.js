@@ -77,6 +77,12 @@ const [selectedProduct, setSelectedProduct] = useState(null);
         return "success";
       case "Cancelled":
         return "danger";
+      case "Return Requested":
+        return "warning";
+      case "Return Rejected":
+        return "danger";
+      case "Returned":
+        return "success";
       default:
         return "secondary";
     }
@@ -108,6 +114,9 @@ const [selectedProduct, setSelectedProduct] = useState(null);
         "Processing",
         "Shipped",
         "Delivered",
+        "Return Requested",
+        "Return Rejected",
+        "Returned",
         "Cancelled",
       ].map((status) => (
 
@@ -218,6 +227,14 @@ const [selectedProduct, setSelectedProduct] = useState(null);
                 {item.status}
               </span>
 
+              {(item.status === "Return Requested" || item.status === "Return Rejected" || item.status === "Returned") && item.return_reason && (
+                <div className="mt-1">
+                  <small className="text-muted d-block" style={{ fontSize: "11px" }}>
+                    Reason: {item.return_reason}
+                  </small>
+                </div>
+              )}
+
             </div>
 
 
@@ -233,6 +250,7 @@ const [selectedProduct, setSelectedProduct] = useState(null);
                 <img
                   src={item.order_items?.[0]?.image}
                   alt=""
+                  className="myorders-img"
                   style={{
                     width:70,
                     height:70,
@@ -316,6 +334,58 @@ const [selectedProduct, setSelectedProduct] = useState(null);
 
                   <button
                     className="btn btn-danger btn-sm"
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        "Are you sure you want to cancel this order? This action cannot be undone."
+                      );
+                      if (!confirmed) return;
+
+                      const { error } = await supabase
+                        .from("orders")
+                        .update({ status: "Cancelled" })
+                        .eq("id", item.id);
+
+                      if (error) {
+                        console.log("Cancel Error:", error);
+                        alert("Failed to cancel order");
+                        return;
+                      }
+
+                      // Restore stock for cancelled items
+                      try {
+                        for (const orderItem of (item.order_items || [])) {
+                          await fetch(`${process.env.REACT_APP_BASE_URL}/api/stock/restore`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              product_id: orderItem.product_id,
+                              quantity: orderItem.quantity,
+                            }),
+                          });
+                        }
+                      } catch (stockErr) {
+                        console.error("Stock restore error:", stockErr);
+                      }
+
+                      // Send cancellation email
+                      try {
+                        const user = JSON.parse(localStorage.getItem("user"));
+                        await fetch(`${process.env.REACT_APP_BASE_URL}/api/email/status-update`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            email: user?.email,
+                            orderId: item.id,
+                            status: "Cancelled",
+                            total: item.total_amount,
+                          }),
+                        });
+                      } catch (emailErr) {
+                        console.error("Email notification error:", emailErr);
+                      }
+
+                      fetchOrders();
+                    }}
                   >
                     Cancel
                   </button>

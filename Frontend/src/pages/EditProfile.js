@@ -111,7 +111,7 @@ const handleForgotPassword = async () => {
     await supabase.auth.resetPasswordForEmail(
       profile.email.trim(),
       {
-        redirectTo:"http://localhost:3000/reset-password",
+        redirectTo:`${window.location.origin}/reset-password`,
       }
     );
 

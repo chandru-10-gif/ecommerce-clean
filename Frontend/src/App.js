@@ -12,7 +12,7 @@ import { BrowserRouter } from "react-router-dom";
 
 function App() {
   return (
-    <BrowserRouter basename="/ecommerce-clean">
+    <BrowserRouter>
       <Provider store={store}>
         <div className="App">
           <Router />

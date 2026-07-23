@@ -66,7 +66,7 @@ export default function ResetPassword(){
 
 
       <div
-      className="card p-4 shadow mx-auto"
+      className="card p-4 shadow mx-auto reset-password-card"
       style={{
         maxWidth:"400px"
       }}

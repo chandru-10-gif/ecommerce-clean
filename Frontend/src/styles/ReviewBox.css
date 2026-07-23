@@ -104,14 +104,60 @@
 
 
 
-@media(max-width:768px){
+@media(max-width:767px){
 
 .review-box{
 
-margin:20px;
+margin:15px;
+padding:18px;
+border-radius:14px;
+}
 
-padding:20px;
+.review-box h3 {
+font-size: 22px;
+}
 
+.stars span {
+font-size: 36px !important;
+}
+
+}
+
+
+/* ===== SMALL PHONES 320px - 425px ===== */
+@media(max-width:425px){
+
+.review-box{
+  margin:10px !important;
+  padding:12px !important;
+  border-radius:10px !important;
+}
+
+.review-box h3{
+  font-size:17px !important;
+  margin-bottom:15px !important;
+}
+
+.stars{
+  gap:6px !important;
+  margin-bottom:15px !important;
+}
+
+.stars span{
+  font-size:28px !important;
+}
+
+.review-box textarea{
+  height:90px !important;
+  padding:10px !important;
+  font-size:13px !important;
+  border-radius:10px !important;
+}
+
+.review-box button{
+  padding:10px !important;
+  font-size:15px !important;
+  border-radius:8px !important;
 }
 
 }

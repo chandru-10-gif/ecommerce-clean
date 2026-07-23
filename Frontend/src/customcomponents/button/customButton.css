@@ -46,3 +46,12 @@
 .custom-btn.success:hover {
   background: #157347;
 }
+
+/* ===== SMALL PHONES 320px - 425px ===== */
+@media (max-width: 425px) {
+  .custom-btn {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+    border-radius: 5px !important;
+  }
+}
