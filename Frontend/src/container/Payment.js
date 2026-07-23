@@ -4,6 +4,7 @@ import { supabase } from "../services/supabase";
 import BackButton from "./BackButton";
 import { Icon } from "@iconify/react";
 import { validateCoupon } from "../services/CouponService";
+import axios from "axios";
 
 export default function Payment() {
   const location = useLocation();
@@ -98,13 +99,13 @@ export default function Payment() {
 
     try {
       const result = await validateCoupon(code, subtotal);
-      if (result.valid) {
+      if (result.coupon) {
         setAppliedCoupon(result.coupon);
       } else {
-        setCouponError(result.message || "Invalid coupon code");
+        setCouponError(result.error || "Invalid coupon code");
       }
     } catch (err) {
-      const message = err.response?.data?.message || "Invalid coupon code";
+      const message = err.response?.data?.error || "Invalid coupon code";
       setCouponError(message);
     }
   };
@@ -194,6 +195,28 @@ export default function Payment() {
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Notify admin and vendors
+      try {
+        const customerProfile = await supabase
+          .from("profiles")
+          .select("name")
+          .eq("id", user.id)
+          .single();
+
+        const notifRes = await axios.post(
+          `${process.env.REACT_APP_BASE_URL}/api/notifications/order-placed`,
+          {
+            orderId: order.id,
+            items: orderItems,
+            customerName: customerProfile?.data?.name || "A customer",
+            totalAmount: total,
+          }
+        );
+        console.log("Notification response:", notifRes.data);
+      } catch (notifErr) {
+        console.error("Notification FAILED:", notifErr?.response?.data || notifErr.message);
+      }
 
       navigate("/success", {
         state: {

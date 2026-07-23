@@ -5,6 +5,9 @@ import { logoutUser } from "../services/AuthService";
 import { Icon } from "@iconify/react";
 import CustomButton from "../customcomponents/button/CustomButton";
 import { categories } from "../pages/CategorySection";
+import axios from "axios";
+
+const API = process.env.REACT_APP_BASE_URL;
 
 export default function Header({
   search = "",
@@ -30,6 +33,11 @@ const cartCount = cartItems.reduce(
   const [expandedCategory, setExpandedCategory] = useState(null);
   const sidebarRef = useRef(null);
 
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotif, setShowNotif] = useState(false);
+  const notifRef = useRef(null);
+
   const handleLogout = () => {
     logoutUser();
 
@@ -50,6 +58,12 @@ const cartCount = cartItems.reduce(
         !menuRef.current.contains(event.target)
       ) {
         setShowMenu(false);
+      }
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target)
+      ) {
+        setShowNotif(false);
       }
       if (
         sidebarRef.current &&
@@ -81,6 +95,56 @@ const cartCount = cartItems.reduce(
     setProfileName(name);
   }
 }, []);
+
+  const fetchNotifications = async () => {
+    if (role !== "admin" && role !== "vendor") return;
+    const userId = role === "admin" ? "admin" : (() => {
+      try { return JSON.parse(localStorage.getItem("user"))?.id; } catch { return null; }
+    })();
+    if (!userId) return;
+
+    try {
+      const res = await axios.get(`${API}/api/notifications`, {
+        params: { user_id: userId, role },
+      });
+      setNotifications(res.data.notifications || []);
+      setUnreadCount(res.data.unreadCount || 0);
+    } catch (err) {
+      console.log("Notification fetch error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [role]);
+
+  const markAsRead = async (id) => {
+    try {
+      await axios.put(`${API}/api/notifications/${id}/read`);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.log("Mark read error:", err);
+    }
+  };
+
+  const markAllRead = async () => {
+    const userId = role === "admin" ? "admin" : (() => {
+      try { return JSON.parse(localStorage.getItem("user"))?.id; } catch { return null; }
+    })();
+    if (!userId) return;
+    try {
+      await axios.put(`${API}/api/notifications/read-all?user_id=${userId}&role=${role}`);
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.log("Mark all read error:", err);
+    }
+  };
 
 
   return (
@@ -138,6 +202,170 @@ const cartCount = cartItems.reduce(
             width="20"
           />
         </button>
+      )}
+
+      {/* NOTIFICATION BELL */}
+      {(role === "admin" || role === "vendor") && (
+        <div className="me-3" ref={notifRef} style={{ position: "relative" }}>
+          <button
+            className="btn position-relative"
+            onClick={() => setShowNotif(!showNotif)}
+            style={{
+              color: "white",
+              background: "none",
+              border: "none",
+              padding: "5px",
+              fontSize: "22px",
+            }}
+          >
+            <Icon icon="mdi:bell-outline" width="24" />
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  background: "red",
+                  color: "white",
+                  borderRadius: "50%",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  minWidth: "18px",
+                  height: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "2px solid #0dcaf0",
+                }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotif && (
+            <div
+              style={{
+                position: "absolute",
+                top: "40px",
+                right: 0,
+                width: "340px",
+                maxHeight: "400px",
+                overflowY: "auto",
+                background: "#fff",
+                borderRadius: "12px",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+                zIndex: 9999,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "12px 16px",
+                  borderBottom: "1px solid #eee",
+                }}
+              >
+                <h6 style={{ margin: 0, fontWeight: "700", fontSize: "15px" }}>
+                  Notifications
+                </h6>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllRead}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#667eea",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+
+              {notifications.length === 0 ? (
+                <div
+                  style={{
+                    padding: "30px",
+                    textAlign: "center",
+                    color: "#999",
+                    fontSize: "14px",
+                  }}
+                >
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    onClick={() => {
+                      if (!notif.is_read) markAsRead(notif.id);
+                      if (notif.order_id) {
+                        setShowNotif(false);
+                        navigate(role === "admin" ? "/admin/orders" : "/vendor/products");
+                      }
+                    }}
+                    style={{
+                      padding: "12px 16px",
+                      borderBottom: "1px solid #f0f0f0",
+                      cursor: "pointer",
+                      background: notif.is_read ? "#fff" : "#f0f4ff",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          background: notif.is_read ? "#e9ecef" : "#667eea",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Icon
+                          icon="mdi:shopping"
+                          width="18"
+                          color={notif.is_read ? "#666" : "#fff"}
+                        />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: notif.is_read ? "500" : "700", fontSize: "13px", color: "#333" }}>
+                          {notif.title}
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#666", marginTop: "2px", lineHeight: "1.4" }}>
+                          {notif.message}
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "4px" }}>
+                          {new Date(notif.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                      {!notif.is_read && (
+                        <div
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "50%",
+                            background: "#667eea",
+                            flexShrink: 0,
+                            marginTop: "6px",
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       )}
 
 
