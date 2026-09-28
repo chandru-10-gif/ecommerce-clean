@@ -203,19 +203,50 @@ export default function Payment() {
           .select("name")
           .eq("id", user.id)
           .single();
+        const customerName = customerProfile?.data?.name || "A customer";
 
-        const notifRes = await axios.post(
-          `${process.env.REACT_APP_BASE_URL}/api/notifications/order-placed`,
-          {
+        // Create notification for vendor via Supabase directly
+        try {
+          const itemTitles = orderItems.map((item) => item.product_title);
+          const { data: vendorProducts } = await supabase
+            .from("vendor_products")
+            .select("vendor_id")
+            .in("title", itemTitles);
+
+          if (vendorProducts && vendorProducts.length > 0) {
+            const notifiedVendors = new Set();
+            for (const vp of vendorProducts) {
+              if (vp.vendor_id && !notifiedVendors.has(vp.vendor_id)) {
+                notifiedVendors.add(vp.vendor_id);
+                await supabase.from("notifications").insert({
+                  recipient_id: vp.vendor_id,
+                  recipient_role: "vendor",
+                  type: "new_order",
+                  title: "New Order Received",
+                  message: `${customerName} ordered your product(s) (#${order.id.substring(0, 8)})`,
+                  order_id: order.id,
+                  is_read: false,
+                });
+              }
+            }
+          }
+        } catch (vpErr) {
+          console.log("Vendor notification error:", vpErr);
+        }
+
+        // Also try backend notification for admin
+        try {
+          await axios.post(`${process.env.REACT_APP_BASE_URL}/api/notifications/order-placed`, {
             orderId: order.id,
             items: orderItems,
-            customerName: customerProfile?.data?.name || "A customer",
+            customerName,
             totalAmount: total,
-          }
-        );
-        console.log("Notification response:", notifRes.data);
-      } catch (notifErr) {
-        console.error("Notification FAILED:", notifErr?.response?.data || notifErr.message);
+          });
+        } catch (notifErr) {
+          console.error("Backend notification error:", notifErr?.response?.data || notifErr.message);
+        }
+      } catch (profErr) {
+        console.error("Profile fetch error:", profErr);
       }
 
       navigate("/success", {
@@ -544,6 +575,10 @@ export default function Payment() {
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
                   <span>Shipping</span>
                   <span style={{ color: shipping === 0 ? "#198754" : "inherit" }}>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px" }}>
+                  <span>GST (18%)</span>
+                  <span>₹{gstAmount.toFixed(0)}</span>
                 </div>
                 {discount > 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "14px", color: "#198754" }}>

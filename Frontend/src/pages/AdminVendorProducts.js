@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { uploadDocument } from "../services/storageService";
 
 export default function AdminVendorProducts() {
   const [products, setProducts] = useState([]);
@@ -10,7 +11,10 @@ export default function AdminVendorProducts() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectNotes, setRejectNotes] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [approvingId, setApprovingId] = useState(null);
+  const [approveDocumentFile, setApproveDocumentFile] = useState(null);
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -42,48 +46,6 @@ export default function AdminVendorProducts() {
     setLoading(false);
   };
 
-  const handleApprove = async (id) => {
-    if (!window.confirm("Approve this product?")) return;
-    setActionLoading(true);
-    try {
-      await axios.put(`${process.env.REACT_APP_BASE_URL}/api/admin/vendor-products/${id}/approve`);
-      fetchStats();
-      fetchProducts();
-    } catch (err) {
-      console.log("Approve error:", err);
-      alert("Failed to approve product");
-    }
-    setActionLoading(false);
-  };
-
-  const openRejectModal = (id) => {
-    setRejectingId(id);
-    setRejectNotes("");
-    setShowRejectModal(true);
-  };
-
-  const handleReject = async () => {
-    if (!rejectNotes.trim()) {
-      alert("Please enter a rejection reason");
-      return;
-    }
-    setActionLoading(true);
-    try {
-      await axios.put(`${process.env.REACT_APP_BASE_URL}/api/admin/vendor-products/${rejectingId}/reject`, {
-        admin_notes: rejectNotes,
-      });
-      setShowRejectModal(false);
-      setRejectingId(null);
-      setRejectNotes("");
-      fetchStats();
-      fetchProducts();
-    } catch (err) {
-      console.log("Reject error:", err);
-      alert("Failed to reject product");
-    }
-    setActionLoading(false);
-  };
-
   const filteredProducts = products.filter((item) => {
     const matchesFilter = filter === "all" || item.approval_status === filter;
     const matchesSearch =
@@ -102,6 +64,57 @@ export default function AdminVendorProducts() {
     });
   };
 
+  const openApproveModal = (id) => {
+    setApprovingId(id);
+    setApproveDocumentFile(null);
+    setShowApproveModal(true);
+  };
+
+  const handleApproveWithDoc = async () => {
+    setApproving(true);
+    try {
+      let documentUrl = "";
+
+      if (approveDocumentFile) {
+        documentUrl = await uploadDocument(approveDocumentFile);
+      }
+
+      await axios.put(`${process.env.REACT_APP_BASE_URL}/api/admin/vendor-products/${approvingId}/approve`, { document_url: documentUrl });
+      setShowApproveModal(false);
+      setApprovingId(null);
+      setApproveDocumentFile(null);
+      fetchProducts();
+      fetchStats();
+      alert("Product approved successfully!");
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to approve product");
+    }
+    setApproving(false);
+  };
+
+  const openRejectModal = (id) => {
+    setRejectingId(id);
+    setRejectNotes("");
+    setShowRejectModal(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectNotes.trim()) {
+      alert("Please enter a reason for rejection");
+      return;
+    }
+    try {
+      await axios.put(`${process.env.REACT_APP_BASE_URL}/api/admin/vendor-products/${rejectingId}/reject`, { admin_notes: rejectNotes });
+      setShowRejectModal(false);
+      setRejectingId(null);
+      setRejectNotes("");
+      fetchProducts();
+      fetchStats();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to reject product");
+    }
+  };
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "approved":
@@ -117,7 +130,7 @@ export default function AdminVendorProducts() {
 
   return (
     <div className="amp-wrapper">
-      <h2 className="amp-title">Vendor Products Review</h2>
+      <h2 className="amp-title">Seller Products Review</h2>
 
       <div className="amp-stats">
         <div className="amp-stat-card amp-stat-total">
@@ -148,7 +161,7 @@ export default function AdminVendorProducts() {
           <input
             type="text"
             className="amp-search-input"
-            placeholder="Search by product title or vendor name..."
+            placeholder="Search by product title or seller name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -176,7 +189,7 @@ export default function AdminVendorProducts() {
       ) : filteredProducts.length === 0 ? (
         <div className="amp-empty">
           <span className="amp-empty-icon">📭</span>
-          <p>No vendor products found</p>
+          <p>No seller products found</p>
         </div>
       ) : (
         <div className="amp-product-grid">
@@ -209,7 +222,7 @@ export default function AdminVendorProducts() {
                   </div>
                 </div>
                 <div className="amp-card-vendor-info">
-                  <span className="amp-card-vendor">👤 {item.vendor_name || "Unknown Vendor"}</span>
+                  <span className="amp-card-vendor">👤 {item.vendor_name || "Unknown Seller"}</span>
                   <span className="amp-card-shop">🏪 {item.shop_name || "N/A"}</span>
                 </div>
                 <div className="amp-card-date">
@@ -222,27 +235,103 @@ export default function AdminVendorProducts() {
                   </div>
                 )}
 
+                {item.document_url && (
+                  <div style={{ marginTop: "8px" }}>
+                    <a
+                      href={item.document_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 12px",
+                        background: "#e8f0fe",
+                        color: "#1967d2",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        textDecoration: "none",
+                      }}
+                    >
+                      📄 View Document
+                    </a>
+                  </div>
+                )}
+
                 {item.approval_status === "pending" && (
-                  <div className="amp-card-actions">
+                  <div className="amp-card-actions" style={{ marginTop: "10px" }}>
                     <button
                       className="amp-btn-approve"
-                      onClick={() => handleApprove(item.id || item._id)}
-                      disabled={actionLoading}
+                      onClick={() => openApproveModal(item.id || item._id)}
                     >
                       ✓ Approve
                     </button>
                     <button
                       className="amp-btn-reject"
                       onClick={() => openRejectModal(item.id || item._id)}
-                      disabled={actionLoading}
                     >
                       ✕ Reject
                     </button>
                   </div>
                 )}
+
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showApproveModal && (
+        <div className="amp-modal-overlay" onClick={() => { if (!approving) setShowApproveModal(false); }}>
+          <div className="amp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="amp-modal-header">
+              <div>
+                <h3 className="amp-modal-title">Approve Product</h3>
+                <p className="amp-modal-subtitle">Upload an approval document (optional)</p>
+              </div>
+              <button
+                className="amp-modal-close"
+                onClick={() => { if (!approving) setShowApproveModal(false); }}
+                disabled={approving}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="amp-modal-body">
+              <div className="mb-3">
+                <label className="form-label">Approval Document (PDF, Image)</label>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  onChange={(e) => setApproveDocumentFile(e.target.files[0])}
+                  disabled={approving}
+                />
+                <small style={{ color: "#888", fontSize: "12px" }}>
+                  Upload a document before approving if required
+                </small>
+              </div>
+              <div className="amp-card-actions">
+                <button
+                  className="amp-btn-approve"
+                  onClick={handleApproveWithDoc}
+                  disabled={approving}
+                  style={{ flex: 1 }}
+                >
+                  {approving ? "Approving..." : "✓ Confirm & Approve"}
+                </button>
+                <button
+                  className="amp-btn-cancel"
+                  onClick={() => { if (!approving) setShowApproveModal(false); }}
+                  disabled={approving}
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -276,15 +365,13 @@ export default function AdminVendorProducts() {
                 <button
                   className="amp-btn-reject"
                   onClick={handleReject}
-                  disabled={actionLoading}
                   style={{ flex: 1 }}
                 >
-                  {actionLoading ? "Rejecting..." : "Confirm Reject"}
+                  Confirm Reject
                 </button>
                 <button
                   className="amp-btn-cancel"
                   onClick={() => setShowRejectModal(false)}
-                  disabled={actionLoading}
                   style={{ flex: 1 }}
                 >
                   Cancel

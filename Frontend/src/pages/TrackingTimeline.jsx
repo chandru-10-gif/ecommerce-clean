@@ -58,7 +58,7 @@ export default function TrackingTimeline({ status }) {
           width:
             effectiveStep <= 0
               ? "0%"
-              : `${(effectiveStep / (steps.length - 1)) * 100}%`,
+              : `${(effectiveStep / (steps.length - 1)) * 80}%`,
         }}
       />
 

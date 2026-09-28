@@ -47,7 +47,7 @@ export default function VendorAddProduct() {
     const vendorId = getVendorId();
 
     if (!vendorId) {
-      alert("Vendor not found. Please login again.");
+      alert("Seller not found. Please login again.");
       setLoading(false);
       return;
     }

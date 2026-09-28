@@ -38,18 +38,21 @@ export default function Login() {
         .eq("id", result.user.id)
         .single();
 
+      let role = "";
+
       if (!profileError && profile) {
-        localStorage.setItem("role", profile.role || "");
+        role = profile.role || "";
+        localStorage.setItem("role", role);
         localStorage.setItem("name", profile.name || "");
         localStorage.setItem("profileName", profile.name || "");
       }
 
-      if (profile.role === "vendor") {
+      if (role === "vendor") {
         navigate("/vendor");
-      } else if (profile.role === "admin") {
+      } else if (role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/");
+        window.location.href = "/";
       }
     } catch (error) {
       alert(error.message || "Invalid email or password");
@@ -134,7 +137,7 @@ export default function Login() {
         </div>
 
         <div className="mt-2 text-center" style={{ fontSize: "14px" }}>
-          Are you a Vendor?{" "}
+          Are you a Seller?{" "}
           <span
             style={{ color: "blue", cursor: "pointer" }}
             onClick={() => navigate("/vendor-login")}

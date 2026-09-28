@@ -59,7 +59,7 @@ export default function VendorDashboard() {
 
   return (
     <div className="amp-wrapper">
-      <h2 className="amp-title">Vendor Dashboard</h2>
+      <h2 className="amp-title">Seller Dashboard</h2>
 
       <div className="amp-stats">
         <div className="amp-stat-card amp-stat-total">
@@ -84,12 +84,8 @@ export default function VendorDashboard() {
         </div>
       </div>
 
-      <div style={{ marginTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ marginTop: "24px" }}>
         <h4 style={{ margin: 0 }}>Recent Products</h4>
-        <button className="amp-add-btn" onClick={() => navigate("/vendor/add-product")}>
-          <span className="amp-add-icon">+</span>
-          Add Product
-        </button>
       </div>
 
       <div style={{ marginTop: "16px" }}>
@@ -120,6 +116,12 @@ export default function VendorDashboard() {
                     <span className="amp-list-category">{item.category || "N/A"}</span>
                     <span className="amp-list-price">₹{item.price}</span>
                     {getStatusBadge(item.approval_status)}
+                    <button
+                      className="amp-btn-edit"
+                      onClick={() => navigate(`/vendor/edit-product/${item.id || item._id}`)}
+                    >
+                      ✎ Edit
+                    </button>
                   </div>
                 </div>
               </div>

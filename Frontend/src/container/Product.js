@@ -219,6 +219,12 @@ export default function Product() {
 
     if(!item) return;
 
+    const token = Boolean(localStorage.getItem("token"));
+    if (!token) {
+      alert("Please login to add items to cart");
+      navigate("/login");
+      return;
+    }
 
     for (let i = 0; i < quantity; i++) {
 

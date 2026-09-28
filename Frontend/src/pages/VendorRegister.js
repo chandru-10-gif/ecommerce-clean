@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
-import { vendorRegister } from "../services/VendorService";
+import axios from "axios";
 import { vendorRegisterSchema } from "../validations/formSchemas";
+import OtpVerification from "./OtpVerification";
 
 export default function VendorRegister() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
 
   const {
     register,
@@ -30,25 +33,40 @@ export default function VendorRegister() {
     setLoading(true);
 
     try {
-      const res = await vendorRegister({
+      const payload = {
         name: data.name.trim(),
         phone: data.phone.trim(),
         address: data.address.trim(),
         email: data.email.trim(),
         password: data.password,
+        role: "vendor",
         shop_name: data.shop_name.trim(),
         shop_description: data.shop_description?.trim() || "",
-      });
+      };
 
-      alert(res.message || "Vendor registered successfully");
-      navigate("/vendor-login");
+      const res = await axios.post(
+        `${process.env.REACT_APP_BASE_URL}/api/otp/send`,
+        payload
+      );
+
+      setOtpEmail(res.data.email);
+      setOtpSent(true);
     } catch (err) {
       console.log(err);
-      alert(err.response?.data?.error || "Registration failed");
+      alert(err.response?.data?.error || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
+
+  if (otpSent) {
+    return (
+      <OtpVerification
+        email={otpEmail}
+        onBack={() => setOtpSent(false)}
+      />
+    );
+  }
 
   return (
     <div
@@ -71,7 +89,7 @@ export default function VendorRegister() {
           boxShadow: "0 0 10px rgba(0,0,0,0.1)",
         }}
       >
-        <h2 style={{ textAlign: "center" }}>Vendor Register</h2>
+        <h2 style={{ textAlign: "center" }}>Seller Register</h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
@@ -199,12 +217,12 @@ export default function VendorRegister() {
               cursor: "pointer",
             }}
           >
-            {loading ? "Registering..." : "Register as Vendor"}
+            {loading ? "Registering..." : "Register as Seller"}
           </button>
         </form>
 
         <p style={{ textAlign: "center", marginTop: "10px" }}>
-          Already a vendor?{" "}
+          Already a seller?{" "}
           <span
             style={{ color: "blue", cursor: "pointer" }}
             onClick={() => navigate("/vendor-login")}

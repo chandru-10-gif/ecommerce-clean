@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
 import { vendorLogin } from "../services/VendorService";
+import { supabase } from "../services/supabase";
 import loginImage from "../image/3230.jpg";
 import { loginSchema } from "../validations/formSchemas";
 
@@ -31,7 +32,17 @@ export default function VendorLogin() {
       localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
       localStorage.setItem("role", "vendor");
-      localStorage.setItem("shopName", result.user.shop_name || "");
+      localStorage.setItem("shopName", result.profile?.shop_name || "");
+      localStorage.setItem("profileName", result.profile?.name || "");
+
+      const { error: sessionError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (sessionError) {
+        console.warn("Supabase client session not created:", sessionError.message);
+      }
 
       navigate("/vendor");
     } catch (error) {
@@ -52,7 +63,7 @@ export default function VendorLogin() {
       >
         <img
           src={loginImage}
-          alt="Vendor Login"
+          alt="Seller Login"
           className="img-fluid"
           style={{
             height: "180px",
@@ -63,7 +74,7 @@ export default function VendorLogin() {
           }}
         />
 
-        <h2 className="text-center mb-4">Vendor Login</h2>
+        <h2 className="text-center mb-4">Seller Login</h2>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
@@ -103,11 +114,11 @@ export default function VendorLogin() {
           className="mt-3 text-center"
           style={{ fontSize: "14px", color: "gray" }}
         >
-          Vendor Portal - E-Commerce
+          Seller Portal - E-Commerce
         </div>
 
         <div className="mt-2 text-center" style={{ fontSize: "14px" }}>
-          Don't have a vendor account?{" "}
+          Don't have a seller account?{" "}
           <span
             style={{ color: "blue", cursor: "pointer" }}
             onClick={() => navigate("/vendor-register")}

@@ -42,7 +42,7 @@ app.post("/api/login", async (req, res) => {
 
   profile: {
     role: profile.role,
-    user_code: profile.user_code,
+    name: profile.name,
   },
 });
 

@@ -44,6 +44,7 @@ import VendorDashboard from "../pages/VendorDashboard";
 import VendorProducts from "../pages/VendorProducts";
 import VendorAddProduct from "../pages/VendorAddProduct";
 import VendorEditProduct from "../pages/VendorEditProduct";
+import VendorOrders from "../pages/VendorOrders";
 import AdminVendorProducts from "../pages/AdminVendorProducts";
 
 import { getProducts } from "../services/ProductService";
@@ -83,7 +84,8 @@ export default function Home() {
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/vendor") ||
     location.pathname === "/login" ||
-    location.pathname === "/register";
+    location.pathname === "/register" ||
+    (location.pathname === "/" && !token);
 
   useEffect(() => {
     loadProducts();
@@ -196,7 +198,7 @@ export default function Home() {
                   setInStock={setInStock}
                 />
               ) : (
-                <Navigate to="/login" />
+                <Login />
               )
             }
           />
@@ -229,10 +231,7 @@ export default function Home() {
             element={<Success />}
           />
 
-          <Route
-            path="/orders"
-            element={<MyOrders />}
-          />
+          <Route path="/orders" element={<MyOrders />}/>
 
           <Route
             path="/profile"
@@ -320,6 +319,7 @@ export default function Home() {
             <Route path="products" element={<VendorProducts />} />
             <Route path="add-product" element={<VendorAddProduct />} />
             <Route path="edit-product/:id" element={<VendorEditProduct />} />
+            <Route path="orders" element={<VendorOrders />} />
           </Route>
 
                      <Route

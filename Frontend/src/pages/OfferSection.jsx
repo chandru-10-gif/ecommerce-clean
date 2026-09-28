@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Icon } from "@iconify/react";
 
 export default function OfferSection() {
   const navigate = useNavigate();
   const [offerProducts, setOfferProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -33,7 +35,20 @@ export default function OfferSection() {
     fetchOffers();
   }, []);
 
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev === 0 ? offerProducts.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev === offerProducts.length - 1 ? 0 : prev + 1));
+  };
+
   if (loading || offerProducts.length === 0) return null;
+
+  const product = offerProducts[currentIndex];
+  const discount = Math.round(
+    ((product.price - product.offer_price) / product.price) * 100
+  );
 
   return (
     <div style={{ margin: "0 0 20px 0", padding: "0" }}>
@@ -74,131 +89,223 @@ export default function OfferSection() {
         </span>
       </div>
 
-      {/* ALL OFFER PRODUCTS - HORIZONTAL SCROLL */}
+      {/* BIG BANNER WITH ARROWS */}
       <div
         style={{
-          display: "flex",
-          gap: "15px",
-          overflowX: "auto",
-          padding: "20px 5px",
+          position: "relative",
           background: "#fff8f8",
           borderRadius: "0 0 12px 12px",
-          scrollBehavior: "smooth",
+          padding: "20px",
         }}
       >
-        {offerProducts.map((product) => {
-          const discount = Math.round(
-            ((product.price - product.offer_price) / product.price) * 100
-          );
+        {/* LEFT ARROW */}
+        <button
+          onClick={prevSlide}
+          style={{
+            position: "absolute",
+            left: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            background: "rgba(255,255,255,0.9)",
+            border: "none",
+            borderRadius: "50%",
+            width: "44px",
+            height: "44px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            fontSize: "22px",
+            fontWeight: "700",
+            color: "#333",
+          }}
+        >
+          <Icon icon="mdi:chevron-left" width="28" height="28" />
+        </button>
 
-          return (
-            <div
-              key={product.id}
-              onClick={() => navigate(`/product/${product.id}`)}
+        {/* PRODUCT BANNER */}
+        <div
+          onClick={() => navigate(`/product/${product.id}`)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            background: "#fff",
+            borderRadius: "12px",
+            overflow: "hidden",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+            cursor: "pointer",
+            minHeight: "350px",
+          }}
+        >
+          {/* BIG IMAGE */}
+          <div
+            style={{
+              flex: "0 0 55%",
+              maxWidth: "55%",
+              height: "400px",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            <img
+              src={product.image}
+              alt={product.title}
               style={{
-                minWidth: "200px",
-                maxWidth: "200px",
-                background: "#fff",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-                cursor: "pointer",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                flexShrink: 0,
-                border: "1px solid #fee2e2",
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.boxShadow = "0 8px 25px rgba(255,68,68,0.2)";
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/600x400?text=No+Image";
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.08)";
+            />
+            <span
+              style={{
+                position: "absolute",
+                top: "16px",
+                left: "16px",
+                background: "#ff4444",
+                color: "white",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "18px",
+                fontWeight: "800",
               }}
             >
-              <div style={{ position: "relative" }}>
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  style={{
-                    width: "100%",
-                    height: "160px",
-                    objectFit: "cover",
-                  }}
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/200x160?text=No+Image";
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "8px",
-                    left: "8px",
-                    background: "#ff4444",
-                    color: "white",
-                    padding: "3px 8px",
-                    borderRadius: "6px",
-                    fontSize: "11px",
-                    fontWeight: "700",
-                  }}
-                >
-                  {discount}% OFF
-                </span>
-              </div>
+              {discount}% OFF
+            </span>
+          </div>
 
-              <div style={{ padding: "10px" }}>
-                <h6
-                  style={{
-                    fontWeight: "600",
-                    marginBottom: "6px",
-                    fontSize: "13px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {product.title}
-                </h6>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span
-                    style={{
-                      color: "#999",
-                      textDecoration: "line-through",
-                      fontSize: "12px",
-                    }}
-                  >
-                    ₹{product.price}
-                  </span>
-                  <span
-                    style={{
-                      color: "#ff4444",
-                      fontWeight: "700",
-                      fontSize: "15px",
-                    }}
-                  >
-                    ₹{product.offer_price}
-                  </span>
-                </div>
-                <button
-                  style={{
-                    width: "100%",
-                    marginTop: "8px",
-                    padding: "6px",
-                    background: "#ff4444",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  Buy Now
-                </button>
-              </div>
+          {/* PRODUCT INFO */}
+          <div style={{ flex: 1, padding: "30px" }}>
+            <h2
+              style={{
+                fontWeight: "700",
+                marginBottom: "12px",
+                fontSize: "24px",
+                color: "#222",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {product.title}
+            </h2>
+
+            <p
+              style={{
+                color: "#666",
+                fontSize: "14px",
+                marginBottom: "16px",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {product.description}
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <span
+                style={{
+                  color: "#999",
+                  textDecoration: "line-through",
+                  fontSize: "20px",
+                }}
+              >
+                ₹{product.price}
+              </span>
+              <span
+                style={{
+                  color: "#ff4444",
+                  fontWeight: "800",
+                  fontSize: "28px",
+                }}
+              >
+                ₹{product.offer_price}
+              </span>
             </div>
-          );
-        })}
+
+            <button
+              style={{
+                padding: "12px 32px",
+                background: "#ff4444",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: "700",
+                cursor: "pointer",
+              }}
+            >
+              Shop Now
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT ARROW */}
+        <button
+          onClick={nextSlide}
+          style={{
+            position: "absolute",
+            right: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            background: "rgba(255,255,255,0.9)",
+            border: "none",
+            borderRadius: "50%",
+            width: "44px",
+            height: "44px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            fontSize: "22px",
+            fontWeight: "700",
+            color: "#333",
+          }}
+        >
+          <Icon icon="mdi:chevron-right" width="28" height="28" />
+        </button>
+
+        {/* DOTS NAVIGATION */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "8px",
+            marginTop: "16px",
+          }}
+        >
+          {offerProducts.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              style={{
+                width: idx === currentIndex ? "24px" : "10px",
+                height: "10px",
+                borderRadius: "5px",
+                border: "none",
+                background: idx === currentIndex ? "#ff4444" : "#ddd",
+                cursor: "pointer",
+                transition: "all 0.3s",
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

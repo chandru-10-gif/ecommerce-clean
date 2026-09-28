@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import OtpVerification from "./OtpVerification";
 
 export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("user");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
 
   const {
     register,
@@ -26,34 +28,52 @@ export default function Register() {
   });
 
   const onSubmit = async (data) => {
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const payload = {
-        name: data.name.trim(),
-        phone: data.phone.trim(),
-        address: data.address.trim(),
-        email: data.email.trim(),
-        password: data.password,
-        role: selectedRole,
-      };
+  try {
+    const payload = {
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      address: data.address.trim(),
+      email: data.email.trim(),
+      password: data.password,
+      role: selectedRole,
+    };
 
-      if (selectedRole === "vendor") {
-        payload.shop_name = data.shop_name?.trim() || "";
-        payload.shop_description = data.shop_description?.trim() || "";
-      }
-
-      const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/register`, payload);
-
-      alert(res.data.message || "Registered successfully");
-      navigate("/login");
-    } catch (err) {
-      console.log(err);
-      alert(err.response?.data?.error || "Registration failed");
-    } finally {
-      setLoading(false);
+    if (selectedRole === "vendor") {
+      payload.shop_name = data.shop_name?.trim() || "";
+      payload.shop_description = data.shop_description?.trim() || "";
     }
-  };
+
+    // Send OTP request to backend
+    await axios.post(
+      `${process.env.REACT_APP_BASE_URL}/api/otp/send`,
+      payload
+    );
+
+    // Save registration data for OTP verification
+    sessionStorage.setItem("reg_form", JSON.stringify(payload));
+
+    setOtpEmail(payload.email);
+   console.log("Opening OTP page");
+setOtpSent(true);
+  } catch (err) {
+    alert(
+      err.response?.data?.error ||
+        "Failed to send OTP. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+ if (otpSent) {
+    return (
+      <OtpVerification
+        email={otpEmail}
+        onBack={() => setOtpSent(false)}
+      />
+    );
+  }
 
   return (
     <div
@@ -114,7 +134,7 @@ export default function Register() {
                 transition: "all 0.2s",
               }}
             >
-              Vendor
+              Seller
             </button>
           </div>
 
@@ -238,7 +258,7 @@ export default function Register() {
               fontSize: "15px",
             }}
           >
-            {loading ? "Registering..." : selectedRole === "vendor" ? "Register as Vendor" : "Register"}
+            {loading ? "Registering..." : selectedRole === "vendor" ? "Register as Seller" : "Register"}
           </button>
         </form>
 

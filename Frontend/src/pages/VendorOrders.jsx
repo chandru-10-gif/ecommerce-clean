@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import "../styles/AdminOrders.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+const API = process.env.REACT_APP_BASE_URL;
 
 const RETURN_REASONS = {
   wrong_item: "Wrong item received",
@@ -16,7 +19,7 @@ const RETURN_REASONS = {
   other: "Other",
 };
 
-export default function AdminOrders() {
+export default function VendorOrders() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,12 +29,13 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [newOrderNotification, setNewOrderNotification] = useState(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     fetchOrders();
 
     const channel = supabase
-      .channel("orders-realtime")
+      .channel("vendor-orders-realtime")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "orders" },
@@ -57,6 +61,19 @@ export default function AdminOrders() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  useEffect(() => {
+    const orderId = searchParams.get("order_id");
+    if (orderId && orders.length > 0) {
+      const order = orders.find((o) => o.id === orderId);
+      if (order) {
+        setSelectedOrder(order);
+        setSelectedProduct(null);
+        setProductDetails(null);
+        setShowModal(true);
+      }
+    }
+  }, [orders, searchParams]);
 
   const fetchOrders = async () => {
     const { data: ordersData, error: ordersError } = await supabase
@@ -126,6 +143,38 @@ export default function AdminOrders() {
     fetchOrders();
   };
 
+  const updateStatus = async (orderId, status) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", orderId);
+
+    if (error) {
+      console.log("Update Error:", error);
+      return;
+    }
+
+    try {
+      const order = orders.find((o) => o.id === orderId);
+      if (order?.customer?.email) {
+        await fetch(`${API}/api/email/status-update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: order.customer.email,
+            orderId: orderId,
+            status: status,
+            total: order.total_amount,
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error("Email notification error:", emailErr);
+    }
+
+    fetchOrders();
+  };
+
   const openOrderModal = (order) => {
     setSelectedOrder(order);
     setSelectedProduct(null);
@@ -173,6 +222,7 @@ export default function AdminOrders() {
   const getStatCounts = () => ({
     total: orders.length,
     pending: orders.filter((o) => o.status === "Pending").length,
+    packed: orders.filter((o) => o.status === "Packed").length,
     shipped: orders.filter((o) => o.status === "Shipped").length,
     delivered: orders.filter((o) => o.status === "Delivered").length,
     returned: orders.filter((o) => o.status === "Return Requested").length,
@@ -197,13 +247,7 @@ export default function AdminOrders() {
   };
 
   const filterTabs = [
-    "All",
-    "Pending",
-    "Shipped",
-    "Delivered",
-    "Return Requested",
-    "Returned",
-    "Cancelled",
+    "All", "Pending", "Packed", "Shipped", "Out For Delivery", "Delivered", "Return Requested", "Returned", "Cancelled",
   ];
 
   return (
@@ -243,9 +287,8 @@ export default function AdminOrders() {
         }
       `}</style>
 
-      <h2 className="ao-title">All Orders</h2>
+      <h2 className="ao-title">Orders</h2>
 
-      {/* Stats */}
       <div className="ao-stats">
         <div className="ao-stat-card ao-stat-total">
           <span className="ao-stat-number">{stats.total}</span>
@@ -254,6 +297,10 @@ export default function AdminOrders() {
         <div className="ao-stat-card ao-stat-pending">
           <span className="ao-stat-number">{stats.pending}</span>
           <span className="ao-stat-label">Pending</span>
+        </div>
+        <div className="ao-stat-card" style={{ background: "#e8f5e9", border: "2px solid #66bb6a" }}>
+          <span className="ao-stat-number" style={{ color: "#2e7d32" }}>{stats.packed}</span>
+          <span className="ao-stat-label" style={{ color: "#2e7d32" }}>Packed</span>
         </div>
         <div className="ao-stat-card ao-stat-shipped">
           <span className="ao-stat-number">{stats.shipped}</span>
@@ -273,7 +320,6 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
         {filterTabs.map((tab) => (
           <button
@@ -291,11 +337,10 @@ export default function AdminOrders() {
         ))}
       </div>
 
-      {/* Orders List */}
       <div className="ao-orders-list">
         {filteredOrders.length === 0 ? (
           <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>
-            No orders found for this filter
+            No orders found
           </div>
         ) : (
           filteredOrders.map((order, index) => (
@@ -316,86 +361,99 @@ export default function AdminOrders() {
               </div>
 
               <div className="ao-order-body">
-                <div className="ao-order-info">
-                  <div className="ao-info-row">
-                    <span className="ao-info-label">Customer</span>
-                    <span className="ao-info-value">{order.customer?.name || "N/A"}</span>
-                  </div>
-                  <div className="ao-info-row">
-                    <span className="ao-info-label">Phone</span>
-                    <span className="ao-info-value">{order.customer?.phone || "N/A"}</span>
-                  </div>
-                  <div className="ao-info-row">
-                    <span className="ao-info-label">Total</span>
-                    <span className="ao-info-value ao-price">₹{order.total_amount}</span>
-                  </div>
-                  <div className="ao-info-row">
-                    <span className="ao-info-label">Items</span>
-                    <span className="ao-info-value">
-                      {order.products.length} product{order.products.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  {order.deliveryAddress && (
+                  <div className="ao-order-info">
                     <div className="ao-info-row">
-                      <span className="ao-info-label">Delivery</span>
-                      <span className="ao-info-value" style={{ fontSize: "12px" }}>
-                        {order.deliveryAddress.city}, {order.deliveryAddress.state}
+                      <span className="ao-info-label">Customer</span>
+                      <span className="ao-info-value">{order.customer?.name || "N/A"}</span>
+                    </div>
+                    <div className="ao-info-row">
+                      <span className="ao-info-label">Role</span>
+                      <span className="ao-info-value">{order.customer?.role || "user"}</span>
+                    </div>
+                    <div className="ao-info-row">
+                      <span className="ao-info-label">Phone</span>
+                      <span className="ao-info-value">{order.customer?.phone || "N/A"}</span>
+                    </div>
+                    <div className="ao-info-row">
+                      <span className="ao-info-label">Total</span>
+                      <span className="ao-info-value ao-price">₹{order.total_amount}</span>
+                    </div>
+                    <div className="ao-info-row">
+                      <span className="ao-info-label">Items</span>
+                      <span className="ao-info-value">
+                        {order.products.length} product{order.products.length !== 1 ? "s" : ""}
                       </span>
                     </div>
-                  )}
+                    {order.deliveryAddress && (
+                      <div className="ao-info-row">
+                        <span className="ao-info-label">Delivery</span>
+                        <span className="ao-info-value" style={{ fontSize: "12px" }}>
+                          {order.deliveryAddress.city}, {order.deliveryAddress.state}
+                        </span>
+                      </div>
+                    )}
 
-                  {/* Show return reason if Return Requested */}
-                  {order.status === "Return Requested" && order.return_reason && (
-                    <div style={{
-                      marginTop: "10px", padding: "10px", background: "#fff3cd",
-                      borderRadius: "8px", fontSize: "12px",
-                    }}>
-                      <strong style={{ color: "#856404" }}>Return Reason:</strong>{" "}
-                      <span style={{ color: "#856404" }}>
-                        {RETURN_REASONS[order.return_reason] || order.return_reason}
-                      </span>
-                      {order.return_description && (
-                        <p className="mb-0 mt-1" style={{ color: "#666", fontSize: "12px" }}>
-                          {order.return_description}
-                        </p>
-                      )}
+                    {order.status === "Return Requested" && order.return_reason && (
+                      <div style={{
+                        marginTop: "10px", padding: "10px", background: "#fff3cd",
+                        borderRadius: "8px", fontSize: "12px",
+                      }}>
+                        <strong style={{ color: "#856404" }}>Return Reason:</strong>{" "}
+                        <span style={{ color: "#856404" }}>
+                          {RETURN_REASONS[order.return_reason] || order.return_reason}
+                        </span>
+                        {order.return_description && (
+                          <p className="mb-0 mt-1" style={{ color: "#666", fontSize: "12px" }}>
+                            {order.return_description}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  className="ao-order-footer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {order.status === "Return Requested" ? (
+                    <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+                      <button
+                        className="btn btn-success btn-sm flex-grow-1"
+                        onClick={() => approveReturn(order.id)}
+                      >
+                        ✓ Approve Return
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm flex-grow-1"
+                        onClick={() => rejectReturn(order.id)}
+                      >
+                        ✕ Reject Return
+                      </button>
                     </div>
+                  ) : (
+                    <>
+                      <span className="ao-status-label">Update Status</span>
+                      <select
+                        className={`ao-status-select ${getStatusClass(order.status)}`}
+                        value={order.status}
+                        onChange={(e) => updateStatus(order.id, e.target.value)}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Packed">Packed</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </>
                   )}
                 </div>
-              </div>
-
-              {/* Action Area */}
-              <div
-                className="ao-order-footer"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {order.status === "Return Requested" ? (
-                  <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-                    <button
-                      className="btn btn-success btn-sm flex-grow-1"
-                      onClick={() => approveReturn(order.id)}
-                    >
-                      ✓ Approve Return
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm flex-grow-1"
-                      onClick={() => rejectReturn(order.id)}
-                    >
-                      ✕ Reject Return
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: "13px", color: "#888", padding: "4px 0" }}>
-                    Status managed by seller
-                  </div>
-                )}
-              </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Order Detail Modal */}
       {showModal && selectedOrder && (
         <div className="ao-modal-overlay" onClick={closeModal}>
           <div className="ao-modal" onClick={(e) => e.stopPropagation()}>
@@ -406,6 +464,7 @@ export default function AdminOrders() {
                 </h3>
                 <div className="ao-modal-subtitle">
                   <p><strong>Customer:</strong> {selectedOrder.customer?.name || "N/A"}</p>
+                  <p><strong>Role:</strong> {selectedOrder.customer?.role || "user"}</p>
                   <p><strong>Phone:</strong> {selectedOrder.customer?.phone || "N/A"}</p>
                   <p><strong>Total:</strong> ₹{selectedOrder.total_amount}</p>
                   <p><strong>Status:</strong>{" "}
@@ -424,11 +483,6 @@ export default function AdminOrders() {
                       <p className="mb-0">{selectedOrder.deliveryAddress.country}</p>
                     </div>
                   )}
-                  {!selectedOrder.deliveryAddress && selectedOrder.address_id && (
-                    <div style={{ marginTop: "10px", padding: "12px", background: "#fff3cd", borderRadius: "8px", fontSize: "13px", color: "#856404" }}>
-                      <strong>Address ID:</strong> {selectedOrder.address_id}
-                    </div>
-                  )}
                   {selectedOrder.return_reason && (
                     <p><strong>Return Reason:</strong>{" "}
                       {RETURN_REASONS[selectedOrder.return_reason] || selectedOrder.return_reason}
@@ -442,7 +496,6 @@ export default function AdminOrders() {
               <button className="ao-modal-close" onClick={closeModal}>✕</button>
             </div>
 
-            {/* Return Action Buttons in Modal */}
             {selectedOrder.status === "Return Requested" && (
               <div style={{ padding: "15px 20px", background: "#fff3cd", display: "flex", gap: "10px" }}>
                 <button

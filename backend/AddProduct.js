@@ -12,7 +12,7 @@ const supabase = createClient(
 
 router.post("/", async (req, res) => {
   try {
-    const { title, price, category, image, description, stock } = req.body;
+    const { title, price, category, image, description, stock, offer_price, is_offer } = req.body;
 
     const { data, error } = await supabase
       .from("products")
@@ -24,6 +24,8 @@ router.post("/", async (req, res) => {
           image,
           description,
           stock,
+          offer_price: offer_price || null,
+          is_offer: is_offer || false,
         },
       ])
       .select();

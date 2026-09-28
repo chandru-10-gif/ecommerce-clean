@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductListItem from "../components/ProductListItem";
-import { modifyItem, removeitem } from "../redux/reducer/Cart";
+import { modifyItem, removeitem, clearCart } from "../redux/reducer/Cart";
 import { useNavigate } from "react-router-dom";
 import BackButton from "./BackButton";
 
@@ -48,9 +48,23 @@ export default function Cart() {
   return (
 
     <div className="container">
-       <h2 className="cart-title">
+      <h2 className="cart-title text-center">
         🛒 My Cart
       </h2>
+      {list.length > 0 && (
+        <div style={{ textAlign: "right" }}>
+          <button
+            className="btn btn-outline-danger btn-sm"
+            onClick={() => {
+              if (window.confirm("Remove all items from cart?")) {
+                dispatch(clearCart());
+              }
+            }}
+          >
+            Remove All
+          </button>
+        </div>
+      )}
 
       <div className="mt-3">
         <BackButton />
@@ -91,11 +105,11 @@ export default function Cart() {
             ))}
 
             <button
-  className="btn btn-success mt-3 w-100 w-md-auto"
-  onClick={() => navigate("/checkout", { state: { items: list } })}
->
-  Go To Checkout
-</button>
+              className="btn btn-success mt-3 w-100 w-md-auto"
+              onClick={() => navigate("/checkout", { state: { items: list } })}
+            >
+              Go To Checkout
+            </button>
 
           </>
         ) : (

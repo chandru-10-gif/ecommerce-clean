@@ -10,7 +10,10 @@ router.post("/api/register", async (req, res) => {
     phone,
     address,
     email,
-    password
+    password,
+    role,
+    shop_name,
+    shop_description
   } = req.body;
 
   const trimmedName = name?.trim();
@@ -18,6 +21,7 @@ router.post("/api/register", async (req, res) => {
   const trimmedAddress = address?.trim();
   const trimmedEmail = email?.trim();
   const trimmedPassword = password?.trim();
+  const userRole = role === "vendor" ? "vendor" : "user";
 
   if (!trimmedName || !trimmedPhone || !trimmedAddress || !trimmedEmail || !trimmedPassword) {
     return res.status(400).json({ error: "Please fill all required fields" });
@@ -96,24 +100,25 @@ router.post("/api/register", async (req, res) => {
 
     // Insert Profile Data
 
+    const profileData = {
+      id:userId,
+      name:trimmedName,
+      phone: trimmedPhone,
+      address:trimmedAddress,
+      email:trimmedEmail,
+      role: userRole,
+    };
+
+    if (userRole === "vendor") {
+      profileData.shop_name = shop_name?.trim() || "";
+      profileData.shop_description = shop_description?.trim() || "";
+    }
+
     const {
       error:profileError
     } = await globalSupabase
     .from("profiles")
-    .insert([{
-
-      id:userId,
-
-      name:trimmedName,
-      phone: trimmedPhone,
-
-      address:trimmedAddress,
-
-      email:trimmedEmail,
-
-      role:"user"
-
-    }]);
+    .insert([profileData]);
 
 
 

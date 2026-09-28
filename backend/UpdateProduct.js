@@ -20,6 +20,8 @@ router.put("/:id", async (req, res) => {
       image,
       description,
       stock,
+      offer_price,
+      is_offer,
     } = req.body;
 
     const { data, error } = await supabase
@@ -31,6 +33,8 @@ router.put("/:id", async (req, res) => {
         image,
         description,
         stock,
+        offer_price: offer_price || null,
+        is_offer: is_offer || false,
       })
       .eq("id", id)
       .select();

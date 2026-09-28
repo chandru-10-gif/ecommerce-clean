@@ -138,10 +138,6 @@ export default function VendorProducts() {
               ☰
             </button>
           </div>
-          <button className="amp-add-btn" onClick={() => navigate("/vendor/add-product")}>
-            <span className="amp-add-icon">+</span>
-            Add Product
-          </button>
         </div>
       </div>
 
@@ -256,22 +252,20 @@ export default function VendorProducts() {
                   {item.description?.length > 80 ? "..." : ""}
                 </p>
                 <div className="amp-card-actions">
-                  {canEdit(item.approval_status) && (
                     <button
                       className="amp-btn-edit"
                       onClick={() => navigate(`/vendor/edit-product/${item.id || item._id}`)}
                     >
                       ✎ Edit
                     </button>
-                  )}
-                  {canEdit(item.approval_status) && (
-                    <button
-                      className="amp-btn-delete"
-                      onClick={() => handleDelete(item.id || item._id)}
-                    >
-                      🗑 Delete
-                    </button>
-                  )}
+                    {canEdit(item.approval_status) && (
+                      <button
+                        className="amp-btn-delete"
+                        onClick={() => handleDelete(item.id || item._id)}
+                      >
+                        🗑 Delete
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
@@ -354,14 +348,12 @@ export default function VendorProducts() {
                 )}
               </div>
               <div className="amp-list-actions">
-                {canEdit(item.approval_status) && (
-                  <button
-                    className="amp-btn-edit"
-                    onClick={() => navigate(`/vendor/edit-product/${item.id || item._id}`)}
-                  >
-                    ✎ Edit
-                  </button>
-                )}
+                <button
+                  className="amp-btn-edit"
+                  onClick={() => navigate(`/vendor/edit-product/${item.id || item._id}`)}
+                >
+                  ✎ Edit
+                </button>
                 {canEdit(item.approval_status) && (
                   <button
                     className="amp-btn-delete"

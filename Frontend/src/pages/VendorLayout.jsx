@@ -27,7 +27,7 @@ export default function VendorLayout() {
 
       <div className="admin-layout">
         <div className={`sidebar ${open ? "show" : ""}`}>
-          <h3>Vendor Panel</h3>
+          <h3>Seller Panel</h3>
 
           <button onClick={() => handleNavigate("/vendor")}>
             Dashboard
@@ -39,6 +39,10 @@ export default function VendorLayout() {
 
           <button onClick={() => handleNavigate("/vendor/add-product")}>
             Add Product
+          </button>
+
+          <button onClick={() => handleNavigate("/vendor/orders")}>
+            Orders
           </button>
         </div>
 

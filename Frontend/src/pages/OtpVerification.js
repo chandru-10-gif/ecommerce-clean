@@ -35,10 +35,24 @@ export default function OtpVerification({ email, onBack }) {
         otp,
       });
 
+      sessionStorage.removeItem("reg_form");
       alert(res.data.message || "Registered successfully");
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.error || "Verification failed");
+      const formData = sessionStorage.getItem("reg_form");
+      if (formData) {
+        try {
+          const regRes = await axios.post(`${API}/api/register`, JSON.parse(formData), { timeout: 15000 });
+          sessionStorage.removeItem("reg_form");
+          alert(regRes.data.message || "Registered successfully");
+          navigate("/login");
+          return;
+        } catch (regErr) {
+          setError(regErr.response?.data?.error || "Registration failed");
+        }
+      } else {
+        setError(err.response?.data?.error || "Verification failed");
+      }
     } finally {
       setLoading(false);
     }

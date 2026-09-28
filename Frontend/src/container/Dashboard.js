@@ -178,7 +178,7 @@ export default function Dashboard({
             </div>
           )}
 
-          {totalPages > 1 && (
+          {filteredProducts.length > 0 && (
             <div className="pagination-wrapper">
               <ReactPaginate
                 breakLabel="..."
@@ -186,7 +186,7 @@ export default function Dashboard({
                 onPageChange={handlePageChange}
                 pageRangeDisplayed={2}
                 marginPagesDisplayed={1}
-                pageCount={totalPages}
+                pageCount={totalPages || 1}
                 forcePage={page - 1}
                 previousLabel="< Previous"
                 containerClassName="pagination"

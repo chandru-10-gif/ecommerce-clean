@@ -204,6 +204,24 @@ const cartCount = cartItems.reduce(
         </button>
       )}
 
+      {/* VENDOR DASHBOARD */}
+      {role === "vendor" && (
+        <button
+          className="btn me-3"
+          onClick={() => navigate("/vendor")}
+          style={{
+            color: "white",
+            background: "none",
+            border: "none",
+            padding: "5px",
+            fontSize: "22px",
+          }}
+          title="Seller Dashboard"
+        >
+          <Icon icon="mdi:store-cog" width="24" />
+        </button>
+      )}
+
       {/* NOTIFICATION BELL */}
       {(role === "admin" || role === "vendor") && (
         <div className="me-3" ref={notifRef} style={{ position: "relative" }}>
@@ -306,7 +324,7 @@ const cartCount = cartItems.reduce(
                       if (!notif.is_read) markAsRead(notif.id);
                       if (notif.order_id) {
                         setShowNotif(false);
-                        navigate(role === "admin" ? "/admin/orders" : "/vendor/products");
+                        navigate(role === "admin" ? "/admin/orders" : `/vendor/orders?order_id=${notif.order_id}`);
                       }
                     }}
                     style={{

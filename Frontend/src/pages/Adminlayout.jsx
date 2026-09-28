@@ -103,7 +103,7 @@ export default function AdminLayout() {
           <button
             onClick={()=>handleNavigate("/admin/vendor-products")}
           >
-            Vendor Products
+            Seller Products
           </button>
 
 

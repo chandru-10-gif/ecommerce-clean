@@ -20,3 +20,23 @@ export const uploadProductImage = async (file) => {
 
   return data.publicUrl;
 };
+
+export const uploadDocument = async (file) => {
+  if (!file) return "";
+
+  const fileName = `documents/${uuidv4()}-${file.name}`;
+
+  const { error } = await supabase.storage
+    .from("upload-image")
+    .upload(fileName, file);
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } = supabase.storage
+    .from("upload-image")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+};

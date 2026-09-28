@@ -16,22 +16,34 @@ export default function Profile() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
-        navigate("/login");
+      if (user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("name, email, role")
+          .eq("id", user.id)
+          .single();
+
+        if (data) {
+          setName(data.name || "");
+          setEmail(data.email || user.email);
+          setRole(data.role || "User");
+        }
         return;
       }
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("name, email, role")
-        .eq("id", user.id)
-        .single();
+      const storedUser = localStorage.getItem("user");
+      const storedRole = localStorage.getItem("role");
+      const storedName = localStorage.getItem("profileName") || localStorage.getItem("name");
 
-      if (data) {
-        setName(data.name || "");
-        setEmail(data.email || user.email);
-        setRole(data.role || "User");
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        setName(storedName || parsed.user_metadata?.name || "");
+        setEmail(parsed.email || "");
+        setRole(storedRole || "user");
+        return;
       }
+
+      navigate("/login");
     };
 
     fetchProfile();

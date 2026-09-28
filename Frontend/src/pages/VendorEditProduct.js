@@ -46,12 +46,6 @@ export default function VendorEditProduct() {
         setProductStatus(status);
         setRejectionReason(product.admin_notes || "");
 
-        if (status !== "pending" && status !== "rejected") {
-          alert("This product cannot be edited. Only pending or rejected products can be edited.");
-          navigate("/vendor/products");
-          return;
-        }
-
         reset({
           title: product.title || "",
           price: product.price || "",
